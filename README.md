@@ -5,6 +5,7 @@
 
 事件引擎借鉴 `vnpy` 
 
+支持华泰和佣金宝
 
 有兴趣的可以加群 `429011814` 一起交流
 
@@ -18,9 +19,19 @@
 
 ### 使用 
 
-在 `me.json` 中填入你的华泰信息，然后运行以下命令即可看到效果
+#### 华泰
 
-[如何填写](https://github.com/shidenggui/easytrader)
+在 `me.json` 中填入你的华泰信息
+
+[如何填写相关信息](https://github.com/shidenggui/easytrader)
+
+#### 佣金宝 
+
+运行 DEMO 会提示你输入佣金宝的 `token`  
+
+[如何获取 token, 即文章中的 `JSESSIONID`](http://www.jisilu.cn/question/42707)
+
+#### 运行 DEMO
 
 ```
 python test.py

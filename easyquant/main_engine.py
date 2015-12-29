@@ -15,12 +15,11 @@ StreamHandler(sys.stdout).push_application()
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
-    def __init__(self, broker, config_path='me.json'):
+    def __init__(self, broker, need_data='me.json'):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         self.user = easytrader.use(broker)
-        self.user.read_config(config_path)
-        self.user.autologin()
+        self.user.prepare(need_data)
 
         self.event_engine = EventEngine()
         self.quotation_engine = Quotation(self.event_engine)
