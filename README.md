@@ -19,17 +19,9 @@
 
 ### 使用 
 
-#### 华泰
-
-在 `me.json` 中填入你的华泰信息
+在 `ht.json` 或 `yjb.json` 中填入你的信息
 
 [如何填写相关信息](https://github.com/shidenggui/easytrader)
-
-#### 佣金宝 
-
-运行 DEMO 会提示你输入佣金宝的 `token`  
-
-[如何获取 token, 即文章中的 `JSESSIONID`](http://www.jisilu.cn/question/42707)
 
 #### 运行 DEMO
 

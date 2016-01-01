@@ -10,6 +10,7 @@ import base64
 import urllib
 import sys
 import threading
+from collections import OrderedDict
 from logbook import Logger, StreamHandler
 from . import helpers
 from .webtrader import WebTrader
@@ -49,20 +50,6 @@ class HTTrader(WebTrader):
         # 获取mac地址 link: http://stackoverflow.com/questions/28927958/python-get-mac-address
         self.__mac = ("".join(c + "-" if i % 2 else c for i, c in enumerate(hex(
             uuid.getnode())[2:].zfill(12)))[:-1]).upper()
-
-    def prepare(self, need_data):
-        self.read_config(need_data.strip())
-        self.autologin()
-
-    def read_config(self, path):
-        self.account_config = helpers.file2dict(path)
-
-    def autologin(self):
-        """实现自动登录"""
-        is_login_ok = self.login()
-        if not is_login_ok:
-            self.autologin()
-        self.keepalive()
 
     def login(self):
         """实现华泰的自动登录"""
@@ -236,7 +223,7 @@ class HTTrader(WebTrader):
         )
 
     def create_basic_params(self):
-        basic_params = dict(
+        basic_params = OrderedDict(
             uid=self.__uid,
             version=1,
             custid=self.account_config['userName'],
@@ -255,7 +242,7 @@ class HTTrader(WebTrader):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
         }
-
+        params.move_to_end('ram')
         params_str = urllib.parse.urlencode(params)
         unquote_str = urllib.parse.unquote(params_str)
         log.debug('request params: %s' % unquote_str)
