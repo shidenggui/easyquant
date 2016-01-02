@@ -3,10 +3,11 @@ import sys
 import importlib
 from collections import OrderedDict
 from logbook import Logger, StreamHandler
+import anyjson as json
 from . import easytrader
 from .quotation_engine import *
 from .event_engine import *
-from .event_type import *
+from .event_type import EventType
 
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
@@ -24,15 +25,17 @@ class MainEngine:
         self.event_engine = EventEngine()
         self.quotation_engine = Quotation(self.event_engine)
 
-        self.event_engine.register(EVENT_TIMER, self.test)
+        self.event_engine.register(EventType.TIMER, self.second_click)
 
         # 保存读取的策略类
         self.strategies = OrderedDict()
         self.strategy_list = list()
+
+        self.r = redis.StrictRedis(host='192.168.10.10')
         print('启动主引擎')
 
-    def test(self, event):
-        print('触发计时器')
+    def second_click(self, event):
+        pass
 
     def start(self):
         """启动主引擎"""
@@ -51,7 +54,7 @@ class MainEngine:
             strategy_module = importlib.import_module('.' + strategy_module_name, 'strategies')
             self.strategy_list.append(getattr(strategy_module, 'Strategy')(self.user))
         for strategy in self.strategy_list:
-            self.event_engine.register(EVENT_QUOTATION, strategy.run)
+            self.event_engine.register(EventType.QUOTATION, strategy.run)
         log.info('加载策略完毕')
 
     def quotation_test(self, event):

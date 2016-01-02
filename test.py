@@ -7,7 +7,7 @@ broker = 'ht' if choose == '1' else 'yjb'
 
 
 def get_broker_need_data(choose_broker):
-    need_data = input('请输入你的华泰帐号配置文件路径(直接回车使用 %s.json):' % choose_broker)
+    need_data = input('请输入你的帐号配置文件路径(直接回车使用 %s.json):' % choose_broker)
     if need_data == '':
         return '%s.json' % choose_broker
     return need_data
