@@ -3,7 +3,6 @@ import sys
 import importlib
 from collections import OrderedDict
 from logbook import Logger, StreamHandler
-import anyjson as json
 from . import easytrader
 from .quotation_engine import *
 from .event_engine import *
@@ -31,7 +30,6 @@ class MainEngine:
         self.strategies = OrderedDict()
         self.strategy_list = list()
 
-        self.r = redis.StrictRedis(host='192.168.10.10')
         print('启动主引擎')
 
     def second_click(self, event):
