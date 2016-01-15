@@ -1,9 +1,8 @@
 import re
 import json
-import time
 import asyncio
-import requests
-from . import helper
+import aiohttp
+from . import helpers
 
 
 class Sina:
@@ -31,7 +30,7 @@ class Sina:
             self.stock_list.append(request_list)
 
     def load_stock_codes(self):
-        with open(helper.stock_code_path()) as f:
+        with open(helpers.stock_code_path()) as f:
             self.stock_codes = json.load(f)['stock']
 
     @property
@@ -39,9 +38,9 @@ class Sina:
         return self.get_stock_data()
 
     async def get_stocks_by_range(self, index):
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(None, requests.get, self.sina_stock_api + self.stock_list[index])
-        self.stock_data.append(response.text)
+        async with aiohttp.get(self.sina_stock_api + self.stock_list[index]) as r:
+            response_text = await r.text()
+            self.stock_data.append(response_text)
 
     def get_stock_data(self):
         threads = []
