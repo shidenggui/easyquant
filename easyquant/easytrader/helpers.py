@@ -28,23 +28,27 @@ def recognize_verify_code(image_path, broker='ht'):
     """识别验证码，返回识别后的字符串，使用 tesseract 实现
     :param image_path
     :return recognized verify code string"""
-    verify_code_tool = 'getcode_jdk1.5.jar' if broker == 'ht' else 'yjb_verify_code.jar guojin'
-    # 检查 java 环境，若有则调用 jar 包处理 (感谢空中园的贡献)
-    out_put = subprocess.getoutput('java -version')
-    log.debug('java detect result: %s' % out_put)
-    if out_put.find('java version') is not -1:
-        out_put = subprocess.getoutput(
-            'java -jar %s %s' % (os.path.join(os.path.dirname(__file__), 'thirdlibrary', verify_code_tool), image_path))
-        log.debug('recognize output: %s' % out_put)
-        verify_code_start = -4
-        return out_put[verify_code_start:]
+    if broker in ['ht', 'yjb']:
+        verify_code_tool = 'getcode_jdk1.5.jar' if broker == 'ht' else 'yjb_verify_code.jar guojin'
+        # 检查 java 环境，若有则调用 jar 包处理 (感谢空中园的贡献)
+        out_put = subprocess.getoutput('java -version')
+        log.debug('java detect result: %s' % out_put)
+        if out_put.find('java version') is not -1 or out_put.find('openjdk') is not -1:
+            out_put = subprocess.getoutput(
+                'java -jar %s %s' % (os.path.join(os.path.dirname(__file__), 'thirdlibrary', verify_code_tool), image_path))
+            log.debug('recognize output: %s' % out_put)
+            verify_code_start = -4
+            return out_put[verify_code_start:]
     # 调用 tesseract 识别
     # ubuntu 15.10 无法识别的手动 export TESSDATA_PREFIX
     system_result = os.system('tesseract {} result -psm 7'.format(image_path))
     system_success = 0
     if system_result != system_success:
-        os.system(
-            'export TESSDATA_PREFIX="/usr/share/tesseract-ocr/tessdata/"; tesseract {} result -psm 7'.format(image_path))
+        system_result = os.system(
+            'export TESSDATA_PREFIX="/usr/share/tesseract-ocr/tessdata/"; tesseract {} result -psm 7'.format(
+                    image_path))
+        if system_result != system_success:
+            log.error("can't find tesseract to recognize verify code")
 
     # 获取识别的验证码
     verify_code_result = 'result.txt'
