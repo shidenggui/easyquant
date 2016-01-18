@@ -4,8 +4,10 @@ import json
 import subprocess
 import sys
 import uuid
+import logbook
 from logbook import Logger, StreamHandler
 
+logbook.set_datetime_format('local')
 StreamHandler(sys.stdout).push_application()
 log = Logger(os.path.basename(__file__))
 
@@ -26,14 +28,15 @@ def get_stock_type(stock_code):
 
 def recognize_verify_code(image_path, broker='ht'):
     """识别验证码，返回识别后的字符串，使用 tesseract 实现
-    :param image_path
-    :return recognized verify code string"""
+    :param image_path: 图片路径
+    :param broker: 券商
+    :return recognized: verify code string"""
     if broker in ['ht', 'yjb']:
         verify_code_tool = 'getcode_jdk1.5.jar' if broker == 'ht' else 'yjb_verify_code.jar guojin'
         # 检查 java 环境，若有则调用 jar 包处理 (感谢空中园的贡献)
         out_put = subprocess.getoutput('java -version')
         log.debug('java detect result: %s' % out_put)
-        if out_put.find('java version') is not -1 or out_put.find('openjdk') is not -1:
+        if out_put.find('java version') != -1 or out_put.find('openjdk') != -1:
             out_put = subprocess.getoutput(
                 'java -jar %s %s' % (os.path.join(os.path.dirname(__file__), 'thirdlibrary', verify_code_tool), image_path))
             log.debug('recognize output: %s' % out_put)
@@ -44,11 +47,9 @@ def recognize_verify_code(image_path, broker='ht'):
     system_result = os.system('tesseract {} result -psm 7'.format(image_path))
     system_success = 0
     if system_result != system_success:
-        system_result = os.system(
+        os.system(
             'export TESSDATA_PREFIX="/usr/share/tesseract-ocr/tessdata/"; tesseract {} result -psm 7'.format(
                     image_path))
-        if system_result != system_success:
-            log.error("can't find tesseract to recognize verify code")
 
     # 获取识别的验证码
     verify_code_result = 'result.txt'
@@ -71,3 +72,18 @@ def get_mac():
     # 获取mac地址 link: http://stackoverflow.com/questions/28927958/python-get-mac-address
     return ("".join(c + "-" if i % 2 else c for i, c in enumerate(hex(
             uuid.getnode())[2:].zfill(12)))[:-1]).upper()
+
+
+def grep_comma(num_str):
+    return num_str.replace(',', '')
+
+
+def str2num(num_str, convert_type='float'):
+    num = float(grep_comma(num_str))
+    return num if convert_type == 'float' else int(num)
+
+
+def get_logger(name):
+    logbook.set_datetime_format('local')
+    StreamHandler(sys.stdout).push_application()
+    return Logger(os.path.basename(name))

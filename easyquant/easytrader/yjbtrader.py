@@ -4,15 +4,12 @@ import random
 import urllib
 import re
 import os
-import sys
 import requests
-from logbook import Logger, StreamHandler
 from . import helpers
 from .webtrader import WebTrader
 from .webtrader import NotLoginError
 
-StreamHandler(sys.stdout).push_application()
-log = Logger(os.path.basename(__file__))
+log = helpers.get_logger(__file__)
 
 
 class YJBTrader(WebTrader):
