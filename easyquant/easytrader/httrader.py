@@ -8,15 +8,12 @@ import uuid
 import socket
 import base64
 import urllib
-import sys
 import threading
 from collections import OrderedDict
-from logbook import Logger, StreamHandler
 from . import helpers
 from .webtrader import WebTrader
 
-StreamHandler(sys.stdout).push_application()
-log = Logger(os.path.basename(__file__))
+log = helpers.get_logger(__file__)
 
 # 移除心跳线程产生的日志
 debug_log = log.debug
@@ -223,6 +220,9 @@ class HTTrader(WebTrader):
         )
 
     def create_basic_params(self):
+        raw_name = self.account_config['userName']
+        use_index_start = 1
+        user_name = raw_name[use_index_start:] if raw_name.startswith('0') else raw_name
         basic_params = OrderedDict(
             uid=self.__uid,
             version=1,
@@ -231,7 +231,7 @@ class HTTrader(WebTrader):
             branch_no=self.__branch_no,
             op_entrust_way=7,
             op_station=self.__op_station,
-            fund_account=self.account_config['userName'],
+            fund_account=user_name,
             password=self.__trdpwd,
             identity_type='',
             ram=random.random()
@@ -257,8 +257,8 @@ class HTTrader(WebTrader):
         filter_empty_list = gbk_str.replace('[]', 'null')
         filter_return = filter_empty_list.replace('\n', '')
         log.debug('response data: %s' % filter_return)
-        response_data =  json.loads(filter_return)
-        if response_data['cssweb_code'] == 'error':
+        response_data = json.loads(filter_return)
+        if response_data['cssweb_code'] == 'error' or response_data['item'] is None:
             return response_data
         return_data = self.format_response_data_type(response_data['item'])
         log.debug('response data: %s' % return_data)
