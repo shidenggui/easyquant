@@ -66,7 +66,7 @@ class EventEngine:
         """启动引擎"""
         while self.__active:
             try:
-                event = self.__queue.get(block=False, timeout=1)
+                event = self.__queue.get(block=True, timeout=1)
                 self.__process(event)
             except Empty:
                 pass
@@ -112,3 +112,7 @@ class EventEngine:
 
     def put(self, event):
         self.__queue.put(event)
+
+    @property
+    def queue_size(self):
+        return self.__queue.qsize()
