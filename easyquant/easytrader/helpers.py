@@ -1,15 +1,28 @@
 # coding: utf-8
-import os
 import json
+import os
+import ssl
 import subprocess
 import sys
 import uuid
+import six
+
 import logbook
 from logbook import Logger, StreamHandler
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.poolmanager import PoolManager
 
 logbook.set_datetime_format('local')
 StreamHandler(sys.stdout).push_application()
 log = Logger(os.path.basename(__file__))
+
+
+class Ssl3HttpAdapter(HTTPAdapter):
+    def init_poolmanager(self, connections, maxsize, block=False):
+        self.poolmanager = PoolManager(num_pools=connections,
+                                       maxsize=maxsize,
+                                       block=block,
+                                       ssl_version=ssl.PROTOCOL_SSLv3)
 
 
 def file2dict(path):
@@ -34,11 +47,17 @@ def recognize_verify_code(image_path, broker='ht'):
     if broker in ['ht', 'yjb']:
         verify_code_tool = 'getcode_jdk1.5.jar' if broker == 'ht' else 'yjb_verify_code.jar guojin'
         # 检查 java 环境，若有则调用 jar 包处理 (感谢空中园的贡献)
-        out_put = subprocess.getoutput('java -version')
+        if six.PY2:
+            import commands
+            getcmdout_func = commands
+        else:
+            getcmdout_func = subprocess
+        out_put = getcmdout_func.getoutput('java -version')
         log.debug('java detect result: %s' % out_put)
         if out_put.find('java version') != -1 or out_put.find('openjdk') != -1:
-            out_put = subprocess.getoutput(
-                'java -jar %s %s' % (os.path.join(os.path.dirname(__file__), 'thirdlibrary', verify_code_tool), image_path))
+            out_put = getcmdout_func.getoutput(
+                    'java -jar %s %s' % (
+                        os.path.join(os.path.dirname(__file__), 'thirdlibrary', verify_code_tool), image_path))
             log.debug('recognize output: %s' % out_put)
             verify_code_start = -4
             return out_put[verify_code_start:]
@@ -48,8 +67,8 @@ def recognize_verify_code(image_path, broker='ht'):
     system_success = 0
     if system_result != system_success:
         os.system(
-            'export TESSDATA_PREFIX="/usr/share/tesseract-ocr/tessdata/"; tesseract {} result -psm 7'.format(
-                    image_path))
+                'export TESSDATA_PREFIX="/usr/share/tesseract-ocr/tessdata/"; tesseract {} result -psm 7'.format(
+                        image_path))
 
     # 获取识别的验证码
     verify_code_result = 'result.txt'

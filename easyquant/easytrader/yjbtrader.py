@@ -1,13 +1,17 @@
 # coding: utf-8
+from __future__ import division
 import json
-import random
-import urllib
-import re
 import os
+import random
+import re
+import urllib
+
 import requests
+import six
+
 from . import helpers
-from .webtrader import WebTrader
 from .webtrader import NotLoginError
+from .webtrader import WebTrader
 
 log = helpers.get_logger(__file__)
 
@@ -16,10 +20,11 @@ class YJBTrader(WebTrader):
     config_path = os.path.dirname(__file__) + '/config/yjb.json'
 
     def __init__(self):
-        super().__init__()
+        super(YJBTrader, self).__init__()
         self.cookie = None
         self.account_config = None
         self.s = requests.session()
+        self.s.mount('https://', helpers.Ssl3HttpAdapter())
 
     def login(self):
         headers = {
@@ -55,11 +60,15 @@ class YJBTrader(WebTrader):
         return verify_code
 
     def post_login_data(self, verify_code):
+        if six.PY2:
+            password = urllib.unquote(self.account_config['password'])
+        else:
+            password = urllib.parse.unquote(self.account_config['password'])
         login_params = dict(
                 self.config['login'],
                 mac_addr=helpers.get_mac(),
                 account_content=self.account_config['account'],
-                password=urllib.parse.unquote(self.account_config['password']),
+                password=password,
                 validateCode=verify_code
         )
         login_response = self.s.post(self.config['login_api'], params=login_params)
@@ -83,9 +92,9 @@ class YJBTrader(WebTrader):
         :param entrust_no: 委托单号
         :param stock_code: 股票代码"""
         cancel_params = dict(
-            self.config['cancel_entrust'],
-            entrust_no=entrust_no,
-            stock_code=stock_code
+                self.config['cancel_entrust'],
+                entrust_no=entrust_no,
+                stock_code=stock_code
         )
         return self.do(cancel_params)
 
@@ -99,9 +108,9 @@ class YJBTrader(WebTrader):
         :param entrust_prop: 委托类型，暂未实现，默认为限价委托
         """
         params = dict(
-            self.config['buy'],
-            entrust_bs=1,  # 买入1 卖出2
-            entrust_amount=amount if amount else volume // price // 100 * 100
+                self.config['buy'],
+                entrust_bs=1,  # 买入1 卖出2
+                entrust_amount=amount if amount else volume // price // 100 * 100
         )
         return self.__trade(stock_code, price, entrust_prop=entrust_prop, other=params)
 
@@ -114,9 +123,9 @@ class YJBTrader(WebTrader):
         :param entrust_prop: 委托类型，暂未实现，默认为限价委托
         """
         params = dict(
-            self.config['sell'],
-            entrust_bs=2,  # 买入1 卖出2
-            entrust_amount=amount if amount else volume // price
+                self.config['sell'],
+                entrust_bs=2,  # 买入1 卖出2
+                entrust_amount=amount if amount else volume // price
         )
         return self.__trade(stock_code, price, entrust_prop=entrust_prop, other=params)
 
@@ -135,7 +144,7 @@ class YJBTrader(WebTrader):
                 stock_code='{:0>6}'.format(stock_code),  # 股票代码, 右对齐宽为6左侧填充0
                 elig_riskmatch_flag=1,  # 用户风险等级
                 entrust_price=price,
-            ))
+        ))
 
     def __get_trade_need_info(self, stock_code):
         """获取股票对应的证券市场和帐号"""
@@ -152,17 +161,17 @@ class YJBTrader(WebTrader):
                     self.config['account4stock'],
                     exchange_type=exchange_type,
                     stock_code=stock_code
-                ))[stock_account_index]
+            ))[stock_account_index]
             self.exchange_stock_account[exchange_type] = response_data['stock_account']
         return dict(
-            exchange_type=exchange_type,
-            stock_account=self.exchange_stock_account[exchange_type]
+                exchange_type=exchange_type,
+                stock_account=self.exchange_stock_account[exchange_type]
         )
 
     def create_basic_params(self):
         basic_params = dict(
-            CSRF_Token='undefined',
-            timestamp=random.random(),
+                CSRF_Token='undefined',
+                timestamp=random.random(),
         )
         return basic_params
 
