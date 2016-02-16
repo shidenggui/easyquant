@@ -8,4 +8,13 @@ class Strategy(StrategyTemplate):
         print('检查持仓')
         print(self.user.balance)
         print('\n')
+        pass
+
+    def clock(self,event):
+        if( event.data.ClockEvent == 0 ):
+            print( time.strftime("\n%m-%d %H:%M:%S", time.localtime()) );
+		elif ( event.data.ClockEvent == 5 ):
+            print( "5分钟")
+        elif (event.data.ClockEvent == 30 ):
+            print( "补充30分钟")
 

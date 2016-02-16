@@ -4,6 +4,7 @@ import importlib
 from collections import OrderedDict
 from logbook import Logger, StreamHandler
 from . import easytrader
+from .clock_engine import *
 from .quotation_engine import *
 from .event_engine import *
 from .event_type import EventType
@@ -19,10 +20,11 @@ class MainEngine:
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         self.user = easytrader.use(broker)
-        self.user.prepare(need_data)
+        #self.user.prepare(need_data)
 
         self.event_engine = EventEngine()
         self.quotation_engine = Quotation(self.event_engine)
+        self.clock_engin = ClockEngine(self.event_engine)
 
         self.event_engine.register(EventType.TIMER, self.second_click)
 
@@ -34,11 +36,13 @@ class MainEngine:
 
     def second_click(self, event):
         pass
+        #print( "1s");
 
     def start(self):
         """启动主引擎"""
         self.event_engine.start()
         self.quotation_engine.start()
+        self.clock_engin.start();
 
     def load_strategy(self):
         """动态加载策略，未完成，隔离策略之间的变量"""
@@ -53,8 +57,10 @@ class MainEngine:
             self.strategy_list.append(getattr(strategy_module, 'Strategy')(self.user))
         for strategy in self.strategy_list:
             self.event_engine.register(EventType.QUOTATION, strategy.run)
+            self.event_engine.register(EventType.CLOCK,strategy.clock)
         log.info('加载策略完毕')
 
+'''
     def quotation_test(self, event):
         """:param event event.data 为所有股票的信息，结构如下
         [{'ask1': '0.493',
@@ -94,3 +100,5 @@ class MainEngine:
         print('触发策略')
         print('检查 %s 价格 %s' % ('162411', event.data['162411']['now']))
         print(event.data['162411'])
+'''
+
