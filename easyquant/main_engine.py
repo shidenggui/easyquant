@@ -4,6 +4,7 @@ import importlib
 from collections import OrderedDict
 from logbook import Logger, StreamHandler
 from . import easytrader
+from .clock_engine import *
 from .quotation_engine import *
 from .event_engine import *
 from .event_type import EventType
@@ -23,6 +24,7 @@ class MainEngine:
 
         self.event_engine = EventEngine()
         self.quotation_engine = Quotation(self.event_engine)
+        self.clock_engin = ClockEngine(self.event_engine)
 
         self.event_engine.register(EventType.TIMER, self.second_click)
 
@@ -39,6 +41,7 @@ class MainEngine:
         """启动主引擎"""
         self.event_engine.start()
         self.quotation_engine.start()
+        self.clock_engin.start();
 
     def load_strategy(self):
         """动态加载策略，未完成，隔离策略之间的变量"""
@@ -53,6 +56,7 @@ class MainEngine:
             self.strategy_list.append(getattr(strategy_module, 'Strategy')(self.user))
         for strategy in self.strategy_list:
             self.event_engine.register(EventType.QUOTATION, strategy.run)
+            self.event_engine.register(EventType.CLOCK,strategy.clock)
         log.info('加载策略完毕')
 
     def quotation_test(self, event):
