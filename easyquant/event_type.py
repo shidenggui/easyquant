@@ -1,6 +1,6 @@
 # coding: utf-8
-#EVENT_TIMER = 'second_timer'
-#EVENT_QUOTATION = 'quotation'
+EVENT_TIMER = 'second_timer'
+EVENT_QUOTATION = 'quotation'
 
 
 class EventType:

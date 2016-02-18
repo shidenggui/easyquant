@@ -20,7 +20,7 @@ class MainEngine:
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         self.user = easytrader.use(broker)
-        #self.user.prepare(need_data)
+        self.user.prepare(need_data)
 
         self.event_engine = EventEngine()
         self.quotation_engine = Quotation(self.event_engine)
@@ -36,7 +36,6 @@ class MainEngine:
 
     def second_click(self, event):
         pass
-        #print( "1s");
 
     def start(self):
         """启动主引擎"""
@@ -60,7 +59,6 @@ class MainEngine:
             self.event_engine.register(EventType.CLOCK,strategy.clock)
         log.info('加载策略完毕')
 
-'''
     def quotation_test(self, event):
         """:param event event.data 为所有股票的信息，结构如下
         [{'ask1': '0.493',
@@ -100,5 +98,3 @@ class MainEngine:
         print('触发策略')
         print('检查 %s 价格 %s' % ('162411', event.data['162411']['now']))
         print(event.data['162411'])
-'''
-
