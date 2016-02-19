@@ -12,6 +12,10 @@ from .event_type import EventType
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
 
+PY_VERSION = sys.version_info[:2]
+if PY_VERSION < (3, 5):
+    raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % PY_VERSION)
+
 
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
