@@ -62,7 +62,7 @@ class ClockEngine:
             if nowtime.tm_sec == self.presec:
                 pass
             else:
-                if nowtime.tm_wday == 5 or nowtime.tm_wday == 6:
+                if nowtime.tm_wday in [5, 6]:
                     pass  # 周末，放假了
                 else:
                     # 工作日，干活了

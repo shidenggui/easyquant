@@ -52,3 +52,5 @@ class StrategyTemplate:
         except Exception as e:
             self.log.error(e)
 
+    def clock(self, event):
+        pass
