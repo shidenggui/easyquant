@@ -95,6 +95,10 @@ class EventEngine:
         self.__active = False
         self.__timer.stop()
         self.__thread.join()
+    
+    def is_alive(self):
+        """检查事件引擎处理线程状态"""
+        return self.__thread.is_alive()
 
     def register(self, event_type, handler):
         """注册事件处理函数监听"""
