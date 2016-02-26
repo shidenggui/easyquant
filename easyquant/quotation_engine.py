@@ -18,6 +18,7 @@ class Quotation:
         self.max_queue_size = 3
 
     def start(self):
+        self.is_active = True
         self.quotation_thread.start()
 
     def get_quotation(self):
@@ -31,6 +32,9 @@ class Quotation:
 
     def stop(self):
         self.is_active = False
+
+    def is_alive(self):
+        return self.quotation_thread.is_alive()
 
 if __name__ == '__main__':
     pass

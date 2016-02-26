@@ -53,7 +53,11 @@ class ClockEngine:
         return False
 
     def start(self):
+        self.is_active = True
         self.clockengine_thread.start()
+    
+    def is_alive(self):
+        return self.clockengine_thread.is_alive()
 
     def clocktick(self):
         while self.is_active:
