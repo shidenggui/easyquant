@@ -4,6 +4,7 @@ import importlib
 from collections import OrderedDict
 from logbook import Logger, StreamHandler
 from . import easytrader
+from .clock_engine import *
 from .quotation_engine import *
 from .event_engine import *
 from .event_type import EventType
@@ -14,6 +15,11 @@ import datetime
 
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
+
+PY_VERSION = sys.version_info[:2]
+if PY_VERSION < (3, 5):
+    raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % PY_VERSION)
+
 ts.set_token('通联数据token')
 
 class MainEngine:
@@ -27,6 +33,7 @@ class MainEngine:
 
         self.event_engine = EventEngine()
         self.quotation_engine = Quotation(self.event_engine)
+        self.clock_engine = ClockEngine(self.event_engine)
 
         self.event_engine.register(EventType.TIMER, self.second_click)
 
@@ -60,6 +67,7 @@ class MainEngine:
             self.strategy_list.append(getattr(strategy_module, 'Strategy')(self.user))
         for strategy in self.strategy_list:
             self.event_engine.register(EventType.QUOTATION, strategy.run)
+            self.event_engine.register(EventType.CLOCK, strategy.clock)
         log.info('加载策略完毕')
 
     def main_manage(self):
@@ -75,11 +83,14 @@ class MainEngine:
                             self.event_engine.stop()
                         if self.quotation_engine.is_alive():
                             self.quotation_engine.stop()
+                        if self.clock_engine.is_alive():
+                            self.clock_engine.stop()
 
                         time.sleep(1)
                         
                         self.event_engine.start()
                         self.quotation_engine.start()
+                        self.clock_engine.start()
                     else:
                         testData = self.user.balance
                         if testData == None:
@@ -88,11 +99,14 @@ class MainEngine:
                                 self.event_engine.stop()
                             if self.quotation_engine.is_alive():
                                 self.quotation_engine.stop()
-
+                            if self.clock_engine.is_alive():
+                                self.clock_engine.stop()
+                        
                             time.sleep(1)
                         
                             self.event_engine.start()
                             self.quotation_engine.start()
+                            self.clock_engine.start()
                         else:
                             print("主引擎状态正常，在此处更新日志")
                 else:
@@ -104,6 +118,8 @@ class MainEngine:
                         self.event_engine.stop()
                     if self.quotation_engine.is_alive():
                         self.quotation_engine.stop()
+                    if self.clock_engine.is_alive():
+                        self.clock_engine.stop()
 
                         time.sleep(1)
             else:
@@ -111,6 +127,9 @@ class MainEngine:
                     self.event_engine.stop()
                 if self.quotation_engine.is_alive():
                     self.quotation_engine.stop()
+                if self.clock_engine.is_alive():
+                    self.clock_engine.stop()
+
                 time.sleep(1)
 
             time.sleep(3)
