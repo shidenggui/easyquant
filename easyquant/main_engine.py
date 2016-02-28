@@ -1,13 +1,15 @@
+import importlib
 import os
 import sys
-import importlib
 from collections import OrderedDict
+
+import easytrader
 from logbook import Logger, StreamHandler
-from . import easytrader
+
 from .clock_engine import *
-from .quotation_engine import *
 from .event_engine import *
 from .event_type import EventType
+from .quotation_engine import *
 
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
