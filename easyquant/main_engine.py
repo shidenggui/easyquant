@@ -50,7 +50,7 @@ class MainEngine:
         self.clock_engine.start()
 
     def load_strategy(self):
-        """动态加载策略，未完成，隔离策略之间的变量"""
+        """动态加载策略"""
         s_folder = 'strategies'
         strategies = os.listdir(s_folder)
         strategies = filter(lambda file: file.endswith('.py') and file != '__init__.py', strategies)
