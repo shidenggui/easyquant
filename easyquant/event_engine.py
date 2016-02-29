@@ -13,6 +13,43 @@ class Event:
         self.data = data
 
 
+class ThreadPool:
+    """线程池"""
+
+    def __init__(self, process_func, size, queue):
+        """
+        @:param
+            process_func 执行函数
+            size 线程个数
+            queue event队列
+        """
+        self.process_func = process_func
+        self.queue = queue
+        self.status = 1
+
+        #初始化并启动线程
+        for i in range(size):
+            handle_thread = Thread(target=self._run)
+            handle_thread.start()
+
+    def stop(self):
+        """
+        停止线程池
+        """
+        self.status = 0
+
+    def _run(self):
+
+        while True:
+            try:
+                if self.status == 0:
+                    break
+                event = self.queue.get(block=True, timeout=1)
+                self.process_func(event)
+            except Exception as e:
+                print str(e)
+
+
 class EventTimer:
     """计时器"""
     def __init__(self, interval_seconds, function):
@@ -57,20 +94,22 @@ class EventEngine:
         self.__timer = EventTimer(interval_seconds=1, function=self.__on_timer)
 
         # 事件引擎处理线程
-        self.__thread = Thread(target=self.__run)
+        # self.__thread = Thread(target=self.__run)
+
+        self.__threadpool = ThreadPool(self.__process, 10, self.__queue)
 
         # 事件字典，key 为时间， value 为对应监听事件函数的列表
         self.__handlers = defaultdict(list)
 
-    def __run(self):
-        """启动引擎"""
-        while self.__active:
-            try:
-                event = self.__queue.get(block=True, timeout=1)
-                handle_thread = Thread(target=self.__process, args=(event, ))
-                handle_thread.start()
-            except Empty:
-                pass
+    # def __run(self):
+    #     """启动引擎"""
+    #     while self.__active:
+    #         try:
+    #             event = self.__queue.get(block=True, timeout=1)
+    #             handle_thread = Thread(target=self.__process, args=(event, ))
+    #             handle_thread.start()
+    #         except Empty:
+    #             pass
 
     def __process(self, event):
         """事件处理"""
@@ -95,7 +134,8 @@ class EventEngine:
         """停止引擎"""
         self.__active = False
         self.__timer.stop()
-        self.__thread.join()
+        self.__threadpool.stop()
+        # self.__thread.join()
 
     def register(self, event_type, handler):
         """注册事件处理函数监听"""
