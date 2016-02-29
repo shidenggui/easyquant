@@ -67,7 +67,8 @@ class EventEngine:
         while self.__active:
             try:
                 event = self.__queue.get(block=True, timeout=1)
-                self.__process(event)
+                handle_thread = Thread(target=self.__process, args=(event, ))
+                handle_thread.start()
             except Empty:
                 pass
 

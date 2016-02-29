@@ -15,15 +15,12 @@ class Quotation:
         self.source = easyquotation.use('sina')
         self.quotation_thread = Thread(target=self.get_quotation)
         self.sleep_time = 1
-        self.max_queue_size = 3
 
     def start(self):
         self.quotation_thread.start()
 
     def get_quotation(self):
         while self.is_active:
-            if self.event_engine.queue_size > self.max_queue_size:
-                self.sleep_time *= 2
             response_data = self.source.all
             event = Event(event_type=EventType.QUOTATION, data=response_data)
             self.event_engine.put(event)
