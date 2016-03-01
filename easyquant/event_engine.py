@@ -4,7 +4,6 @@ from collections import defaultdict
 from .event_type import EventType
 import time
 
-
 class Event:
     """事件对象"""
 
@@ -67,8 +66,7 @@ class EventEngine:
         while self.__active:
             try:
                 event = self.__queue.get(block=True, timeout=1)
-                handle_thread = Thread(target=self.__process, args=(event, ))
-                handle_thread.start()
+                self.__process(event)
             except Empty:
                 pass
 
