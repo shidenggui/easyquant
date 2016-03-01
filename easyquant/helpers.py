@@ -1,4 +1,5 @@
 import datetime
+import time
 from functools import wraps
 
 import requests
@@ -31,11 +32,25 @@ def is_holiday_today():
     today = datetime.date.today().strftime('%Y%m%d')
     return is_holiday(today)
 
+
 def is_tradetime_now():
-    now_hour = datetime.datetime.now().hour
-    now_minute = datetime.datetime.now().minute
-    now = (now_hour, now_minute)
-    if (9, 29) <= now <= (11, 31) or (12, 59) <= now <= (15, 1):
+    now_time = time.localtime()
+    now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
+    if (9, 15, 0) <= now <= (11, 30, 0) or (13, 0, 0) <= now <= (25, 0, 0):
         return True
     return False
 
+
+def calc_next_trade_time_delta_seconds():
+    now_time = datetime.datetime.now()
+    now = (now_time.hour, now_time.minute, now_time.second)
+    if now < (9, 15, 0):
+        next_trade_start = now_time.replace(hour=9, minute=15, second=0)
+    elif (12, 0, 0) < now < (13, 0, 0):
+        next_trade_start = now_time.replace(hour=13, minute=0, second=0)
+    elif now > (15, 0, 0):
+        next_trade_start = now_time.replace(day=now_time.day + 1, hour=9, minute=15, second=0)
+    else:
+        return 0
+    time_delta = next_trade_start - now_time
+    return time_delta.total_seconds()
