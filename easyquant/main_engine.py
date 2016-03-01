@@ -10,6 +10,7 @@ from .clock_engine import *
 from .event_engine import *
 from .event_type import EventType
 from .quotation_engine import *
+from strategy_wrapper import ProcessWrapper
 
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
@@ -36,7 +37,7 @@ class MainEngine:
 
         # 保存读取的策略类
         self.strategies = OrderedDict()
-        self.strategy_list = list()
+        self.process_list = list()
 
         print('启动主引擎')
 
@@ -49,6 +50,12 @@ class MainEngine:
         self.quotation_engine.start()
         self.clock_engine.start()
 
+    def stop(self):
+        self.event_engine.stop()
+        self.clock_engine.stop()
+        for p in self.process_list:
+            p.stop()
+
     def load_strategy(self):
         """动态加载策略"""
         s_folder = 'strategies'
@@ -59,8 +66,11 @@ class MainEngine:
             strategy_module_name = os.path.basename(strategy_file)[:-3]
             log.info('加载策略: %s' % strategy_module_name)
             strategy_module = importlib.import_module('.' + strategy_module_name, 'strategies')
-            self.strategy_list.append(getattr(strategy_module, 'Strategy')(self.user))
-        for strategy in self.strategy_list:
-            self.event_engine.register(EventType.QUOTATION, strategy.run)
-            self.event_engine.register(EventType.CLOCK, strategy.clock)
+            strategy = getattr(strategy_module, 'Strategy')(self.user)
+            process = ProcessWrapper(strategy)
+            self.process_list.append(process)
+        for process in self.process_list:
+
+            self.event_engine.register(EventType.QUOTATION, process.on_event)
+            self.event_engine.register(EventType.CLOCK, process.on_clock)
         log.info('加载策略完毕')
