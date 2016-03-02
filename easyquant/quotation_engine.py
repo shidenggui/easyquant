@@ -1,9 +1,11 @@
 # coding: utf-8
 import time
 from threading import Thread
+
+import easyquotation
+
 from .event_engine import Event
 from .event_type import EventType
-from . import easyquotation
 
 
 class Quotation:
@@ -28,6 +30,7 @@ class Quotation:
 
     def stop(self):
         self.is_active = False
+
 
 if __name__ == '__main__':
     pass

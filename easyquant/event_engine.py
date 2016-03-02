@@ -1,8 +1,9 @@
+import time
+from collections import defaultdict
 from queue import Queue, Empty
 from threading import Thread, Timer
-from collections import defaultdict
+
 from .event_type import EventType
-import time
 
 
 class Event:
@@ -15,6 +16,7 @@ class Event:
 
 class EventTimer:
     """计时器"""
+
     def __init__(self, interval_seconds, function):
         """计时器
         :param interval_seconds:计时间隔
@@ -45,6 +47,7 @@ class EventTimer:
 
 class EventEngine:
     """事件驱动引擎"""
+
     def __init__(self):
         """初始化事件引擎"""
         # 事件队列
@@ -67,7 +70,7 @@ class EventEngine:
         while self.__active:
             try:
                 event = self.__queue.get(block=True, timeout=1)
-                handle_thread = Thread(target=self.__process, args=(event, ))
+                handle_thread = Thread(target=self.__process, args=(event,))
                 handle_thread.start()
             except Empty:
                 pass
