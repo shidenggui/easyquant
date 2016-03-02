@@ -3,3 +3,4 @@ logbook
 anyjson
 aiohttp
 easytrader
+easyquotation
