@@ -1,24 +1,20 @@
 import importlib
 import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+from event import EventType
 from collections import OrderedDict
-
 import easytrader
-from logbook import Logger, StreamHandler
-
+from .engine import Engine
 from .clock_engine import ClockEngine
-from .event_engine import EventEngine, EventType
+from .event_engine import EventEngine
 from .quotation_engine import Quotation
-
-log = Logger(os.path.basename(__file__))
-StreamHandler(sys.stdout).push_application()
 
 PY_VERSION = sys.version_info[:2]
 if PY_VERSION < (3, 5):
     raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % PY_VERSION)
 
-
-class MainEngine:
+class MainEngine(Engine):
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
     def __init__(self, broker, need_data='me.json'):
@@ -36,8 +32,9 @@ class MainEngine:
         # 保存读取的策略类
         self.strategies = OrderedDict()
         self.strategy_list = list()
-
-        print('启动主引擎')
+        global log
+        log = self.log_instance('stream', os.path.basename(__file__)) 
+        log.info('启动主引擎')
 
     def second_click(self, event):
         pass

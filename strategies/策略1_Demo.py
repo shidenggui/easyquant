@@ -1,7 +1,8 @@
 import time
+import os
+import sys
 
 from easyquant import StrategyTemplate
-
 
 class Strategy(StrategyTemplate):
     def strategy(self, event):
@@ -40,11 +41,12 @@ class Strategy(StrategyTemplate):
         """
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
-        print('\n\n策略1触发')
-        print('行情数据: 万科价格: ', event.data['000002'])
-        print('检查持仓')
-        print(self.user.balance)
-        print('\n')
+        self.log = self.log_instance('stream', os.path.basename(__file__))
+        self.log.info('\n\n策略1触发')
+        self.log.info('行情数据: 万科价格: ', event.data['000002'])
+        self.log.info('检查持仓')
+        self.log.info(self.user.balance)
+        self.log.info('\n')
 
     def clock(self, event):
         if event.data.ClockEvent == 0:

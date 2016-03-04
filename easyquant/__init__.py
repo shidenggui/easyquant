@@ -1,2 +1,3 @@
+from .logsys.logsys import LogSys
 from .strategy.strategyTemplate import StrategyTemplate
-from .main_engine import MainEngine
+from .engine.main_engine import MainEngine

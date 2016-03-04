@@ -1,14 +1,16 @@
 # coding: utf-8
 import datetime
 import time
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+from event import EventType
+from utils import helpers
 from threading import Thread
-
-from . import helpers
+from .engine import Engine
 from .event_engine import Event
-from .event_type import EventType
 
-
-class Clock:
+class Clock():
     bTradingTime = False
     ClockEvent = 0  # 0:收市，从交易时间到收市推送一次，0.5,1,5,15,30,60开市时间推送
 
@@ -17,7 +19,7 @@ class Clock:
         self.ClockEvent = clockevent
 
 
-class ClockEngine:
+class ClockEngine(Engine):
     """时间推送引擎"""
 
     def __init__(self, event_engine):

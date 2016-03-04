@@ -1,14 +1,15 @@
 # coding:utf-8
 import os
 import sys
-from logbook import Logger, StreamHandler
-
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+from logsys import LogSys
 
 class StrategyTemplate:
     def __init__(self, user):
         self.user = user
-        self.log = Logger(os.path.basename(__file__))
-        StreamHandler(sys.stdout).push_application()
+
+    def log_instance(self, logtype, filename, loglevel='DEBUG'):
+        return LogSys(logtype, filename, loglevel)
 
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
