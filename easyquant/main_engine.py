@@ -7,6 +7,7 @@ import easytrader
 from logbook import Logger, StreamHandler
 
 from .event_engine import EventEngine
+from .log_handler.default_handler import DefaultLogHandler
 from .push_engine.clock_engine import ClockEngine
 from .push_engine.quotation_engine import DefaultQuotationEngine
 
@@ -21,7 +22,8 @@ if PY_VERSION < (3, 5):
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
-    def __init__(self, broker, need_data='me.json', quotation_engines=[DefaultQuotationEngine], log_handler=log):
+    def __init__(self, broker, need_data='me.json', quotation_engines=[DefaultQuotationEngine],
+                 log_handler=DefaultLogHandler()):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         # 登录账户
@@ -63,7 +65,7 @@ class MainEngine:
             strategy_class = getattr(strategy_module, 'Strategy')
 
             self.strategies[strategy_module_name] = strategy_class
-            self.strategy_list.append(strategy_class(self.user))
+            self.strategy_list.append(strategy_class(self.user, log_handler=self.log))
             self.log.info('加载策略: %s' % strategy_module_name)
         for strategy in self.strategy_list:
             for quotation_engine in self.quotation_engines:
