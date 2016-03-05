@@ -1,10 +1,12 @@
 import time
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+from event import EventType
 from collections import defaultdict
 from queue import Queue, Empty
 from threading import Thread, Timer
-
-from .event_type import EventType
-
+from .engine import Engine
 
 class Event:
     """事件对象"""
@@ -12,7 +14,6 @@ class Event:
     def __init__(self, event_type, data=None):
         self.event_type = event_type
         self.data = data
-
 
 class EventTimer:
     """计时器"""
@@ -45,7 +46,7 @@ class EventTimer:
             time.sleep(self.__interval)
 
 
-class EventEngine:
+class EventEngine(Engine):
     """事件驱动引擎"""
 
     def __init__(self):

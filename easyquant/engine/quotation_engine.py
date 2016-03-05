@@ -1,14 +1,15 @@
 # coding: utf-8
 import time
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+from event import EventType
 from threading import Thread
-
 import easyquotation
-
 from .event_engine import Event
-from .event_type import EventType
+from .engine import Engine
 
-
-class Quotation:
+class Quotation(Engine):
     """行情推送引擎"""
 
     def __init__(self, event_engine):
