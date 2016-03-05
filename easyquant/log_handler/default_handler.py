@@ -10,18 +10,18 @@ logbook.set_datetime_format('local')
 class DefaultLogHandler(object):
     """默认的 Log 类"""
 
-    def __init__(self, name='default', logtype='stream', filepath='default.log', loglevel='DEBUG'):
+    def __init__(self, name='default', log_type='stdout', filepath='default.log', loglevel='DEBUG'):
         """Log对象
         :param name: log 名字
-        :param :logtype: 'stream' 输出到屏幕, 'file' 输出到指定文件
+        :param :logtype: 'stdout' 输出到屏幕, 'file' 输出到指定文件
         :param :filename: log 文件名
         :param :loglevel: 设定log等级 ['CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG', 'TRACE', 'NOTSET']
         :return log handler object
         """
         self.log = Logger(name)
-        if logtype == 'stream':
+        if log_type == 'stdout':
             StreamHandler(sys.stdout, level=loglevel).push_application()
-        if logtype == 'file':
+        if log_type == 'file':
             if os.path.isdir(filepath) and not os.path.exists(filepath):
                 os.makedirs(os.path.dirname(filepath))
             FileHandler(filepath, level=loglevel).push_application()
