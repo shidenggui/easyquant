@@ -1,9 +1,10 @@
-import time
-
+from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
+    name = '测试策略1'
+
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
         {'162411':
@@ -40,16 +41,30 @@ class Strategy(StrategyTemplate):
         """
         # 使用 self.user 来操作账户，用法同 easytrader 用法
         # 使用 self.log.info('message') 来打印你所需要的 log
-        print('\n\n策略1触发')
-        print('行情数据: 万科价格: ', event.data['000002'])
-        print('检查持仓')
-        print(self.user.balance)
-        print('\n')
+        print('demo1 的 log 使用自定义 log 的方式记录在 demo1.log')
+        self.log.info(self.log)
+        self.log.info(self.log.name)
+        self.log.info('\n\n策略1触发')
+        self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
+        self.log.info('检查持仓')
+        self.log.info(self.user.balance)
+        self.log.info('\n')
 
     def clock(self, event):
-        if event.data.ClockEvent == 0:
-            print(time.strftime("\n%m-%d %H:%M:%S", time.localtime()))
-        elif event.data.ClockEvent == 5:
-            print("5分钟")
-        elif event.data.ClockEvent == 30:
-            print("30分钟")
+        """在交易时间会定时推送 clock 事件
+        :param event: event.data.clock_event 为 [0.5, 1, 3, 5, 15, 30, 60] 单位为分钟,  ['open', 'close'] 为开市、收市
+            event.data.trading_state  bool 是否处于交易时间
+        """
+        if event.data.clock_event == 'open':
+            # 开市了
+            self.log.info('open')
+        elif event.data.clock_event == 'close':
+            # 收市了
+            self.log.info('close')
+        elif event.data.clock_event == 5:
+            # 5 分钟的 clock
+            self.log.info("5分钟")
+
+    def log_handler(self):
+        """自定义 log 记录方式"""
+        return DefaultLogHandler(self.name, log_type='file', filepath='demo1.log')

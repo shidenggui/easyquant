@@ -1,21 +1,13 @@
-import time
-
 from easyquant import StrategyTemplate
 
 
 class Strategy(StrategyTemplate):
-    def strategy(self, event):
-        print('\n\n策略2触发')
-        print('行情数据: 华宝油气', event.data['162411'])
-        print('检查持仓')
-        print(self.user.balance)
-        print('\n')
-        pass
+    name = '测试策略2'
 
-    def clock(self, event):
-        if event.data.ClockEvent == 0:
-            print(time.strftime("\n%m-%d %H:%M:%S", time.localtime()))
-        elif event.data.ClockEvent == 5:
-            print("5分钟")
-        elif event.data.ClockEvent == 30:
-            print("30分钟")
+    def strategy(self, event):
+        self.log.info('\n\n策略2触发')
+        self.log.info('行情数据: 华宝油气 %s' % event.data['162411'])
+        self.log.info('检查持仓')
+        self.log.info(self.user.balance)
+        self.log.info('\n')
+

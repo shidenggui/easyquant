@@ -24,7 +24,8 @@ class DefaultLogHandler(object):
         if log_type == 'file':
             if os.path.isdir(filepath) and not os.path.exists(filepath):
                 os.makedirs(os.path.dirname(filepath))
-            FileHandler(filepath, level=loglevel).push_application()
+            file_handler = FileHandler(filepath, level=loglevel)
+            self.log.handlers.append(file_handler)
 
     def __getattr__(self, item, *args, **kwargs):
         return self.log.__getattribute__(item, *args, **kwargs)
