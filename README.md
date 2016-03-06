@@ -6,6 +6,8 @@
 事件引擎借鉴 `vnpy` 
 
 交易:支持华泰、佣金宝、银河以及雪球模拟盘
+
+
 行情:支持新浪免费实时行情，集思路分级基金以及 leverfun 的免费十档行情
 
 有兴趣的可以加群 `429011814` 一起交流
@@ -58,8 +60,61 @@ python test.py
 策略用 `Python` 编写后置于 `strategies` 文件夹下
 格式可参考其中的 `Demo`
 
+#### Hello World
 
-#### 一个简单的策略示例
+
+```
+# 引入策略模板
+from easyquant import StrategyTemplate
+
+# 定义策略类
+class Strategy(StrategyTemplate):
+    name = 'Hello World' # 定义策略名字
+    
+    # 策略函数，收到行情推送后会自动调用
+    def strategy(self, event):
+        """:param event event.data 为所有股票行情的字典，结构如下
+        {'162411':
+        {'ask1': '0.493',
+         'ask1_volume': '75500',
+         'ask2': '0.494',
+         'ask2_volume': '7699281',
+         'ask3': '0.495',
+         'ask3_volume': '2262666',
+         'ask4': '0.496',
+         'ask4_volume': '1579300',
+         'ask5': '0.497',
+         'ask5_volume': '901600',
+         'bid1': '0.492',
+         'bid1_volume': '10765200',
+         'bid2': '0.491',
+         'bid2_volume': '9031600',
+         'bid3': '0.490',
+         'bid3_volume': '16784100',
+         'bid4': '0.489',
+         'bid4_volume': '10049000',
+         'bid5': '0.488',
+         'bid5_volume': '3572800',
+         'buy': '0.492',
+         'close': '0.499',
+         'high': '0.494',
+         'low': '0.489',
+         'name': '华宝油气',
+         'now': '0.493',
+         'open': '0.490',
+         'sell': '0.493',
+         'turnover': '420004912',
+         'volume': '206390073.351'}}
+        """
+        # 使用 self.user 来操作账户，用法见 easytrader 用法
+        # 使用 self.log.info('message') 来打印你所需要的 log
+        self.log.info('\n\n策略1触发')
+        self.log.info('行情数据: 万科价格: %s' % event.data['000002'])
+        self.log.info('检查持仓')
+        self.log.info(self.user.balance)
+```
+
+#### 稍显复杂的策略示例
 
 ```python
 # 引入策略模板
