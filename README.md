@@ -262,10 +262,21 @@ class Strategy(StrategyTemplate):
 
 允许使用自定义的其他行情，支持添加多个行情来源
 
+### 修改默认 sina 行情的推送时间
+
+``` python
+from easyquant import DefaultQuotationEngine
+
+DefaultQuotationEngine.PushInterval = 30 # 改为 30s 推送一次
+m = easyquant.MainEngine(broker, need_data, quotation_engine=[DefaultQuotationEngine])
+```
+
 #### 示例: 使用 lf 的十档行情
 
 ```python
 import easyquotation
+from easyquant import PushBaseEngine # 引入行情引擎的基类
+
 class LFEngine(PushBaseEngine):
     EventType = 'lf' # 指定行情的 EventType
     PushInterval = 5 # 指定行情的推送间隔， 默认为 1s
@@ -275,7 +286,7 @@ class LFEngine(PushBaseEngine):
         self.source = easyquotation.use('lf')
 
     def fetch_quotation(self):
-        # 放回行情
+        # 返回行情
         return self.source.stocks(['162411', '000002'])
 m = easyquant.MainEngine(broker, need_data, quotation_engine=[LFEngine])
 ```
@@ -284,13 +295,8 @@ m = easyquant.MainEngine(broker, need_data, quotation_engine=[LFEngine])
 
 可同时使用多个行情引擎，此时在策略中使用 `event.event_type` 来区分行情来源
 
-```
+```python
 from easyquant import DefaultQuotationEngine
 
 m = easyquant.MainEngine(broker, need_data, quotation_engine=[DefaultQuotationEngine, LFEngine, OtherEngine])
 ```
-
-
-
-
-
