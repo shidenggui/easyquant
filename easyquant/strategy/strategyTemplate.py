@@ -8,6 +8,11 @@ class StrategyTemplate:
         self.user = user
         custom_log_handler = self.log_handler()
         self.log = log_handler if custom_log_handler is None else custom_log_handler
+        self.init()
+
+    def init(self):
+        # 进行相关的初始化操作
+        pass
 
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
