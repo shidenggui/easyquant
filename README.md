@@ -262,7 +262,7 @@ class Strategy(StrategyTemplate):
 
 允许使用自定义的其他行情，支持添加多个行情来源
 
-### 修改默认 sina 行情的推送时间
+#### 修改默认 sina 行情的推送时间
 
 ``` python
 from easyquant import DefaultQuotationEngine
@@ -291,7 +291,7 @@ class LFEngine(PushBaseEngine):
 m = easyquant.MainEngine(broker, need_data, quotation_engine=[LFEngine])
 ```
 
-### 使用多个行情来源
+#### 使用多个行情来源
 
 可同时使用多个行情引擎，此时在策略中使用 `event.event_type` 来区分行情来源
 
