@@ -28,7 +28,11 @@
 ### 关于行情
 
 默认使用的是 sina 的免费全市场行情，1s 推送一次
+
+
 可自定义使用的行情来源或者使用 `easyquotation` 的 `lf` 免费十档行情 和 集思路的分级基金行情
+
+
 具体可参见 [easyquotation](https://github.com/shidenggui/easyquotation) 
 
 ### 关于交易
@@ -164,9 +168,10 @@ class Strategy(StrategyTemplate):
 
 #### 存储日志到文件
 
-```
-from easyquant import DefaultLogHandler
+```python
+from easyquant import DefaultLogHandler # 默认的 log handler,支持输出日志到屏幕和文件,
 
+#  这里使用自带的 log handler, 也可使用自己编写的其他 log handler
 log_handler = DefaultLogHandler(name='策略日志', log_type='file', filepath='日志文件.log')
 
 m = easyquant.MainEngine(broker, need_data, log_handler=log_handler)
@@ -176,16 +181,17 @@ m.start()
 
 #### 自定义每个策略的 log handler
 
-除了上面使用的全局 log handler 外，还可以使用每隔策略自定义的 log handler
+除了上面使用的全局 log handler 外，还可以为每个策略定义使用的 log handler
 
 ```python
+# define your_log_handler
 class Strategy(StrategyTemplate):
     ...
     def log_handler(self):
         return your_log_handler
 ```
 
-##### 存储每个策略的日志到不同的文件中
+##### 示例:存储每个策略的日志到不同的文件中
 
 ```python
 from easyquant import DefaultLogHandler
@@ -198,12 +204,15 @@ class Strategy(StrategyTemplate):
 
 ### 自定义行情引擎
 
+允许使用自定义的其他行情，支持添加多个行情来源
+
 #### 示例,使用 lf 的十档行情
 
 ```python
 import easyquotation
 class LFEngine(PushBaseEngine):
     EventType = 'lf' # 指定行情的 EventType
+    PushInterval = 5 # 指定行情的推送间隔， 默认为 1s
 
     def init(self):
         # 进行相关的初始化操作
