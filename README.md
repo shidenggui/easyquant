@@ -247,7 +247,7 @@ class Strategy(StrategyTemplate):
         return your_log_handler
 ```
 
-##### 示例:存储每个策略的日志到不同的文件中
+##### 示例: 存储每个策略的日志到不同的文件中
 
 ```python
 from easyquant import DefaultLogHandler
@@ -262,7 +262,7 @@ class Strategy(StrategyTemplate):
 
 允许使用自定义的其他行情，支持添加多个行情来源
 
-#### 示例,使用 lf 的十档行情
+#### 示例: 使用 lf 的十档行情
 
 ```python
 import easyquotation
