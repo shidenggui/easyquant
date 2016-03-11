@@ -21,7 +21,6 @@ def memcache(func):
 def is_holiday(day):
     api = 'http://www.easybots.cn/api/holiday.php'
     now_day = datetime.date.today().strftime('%Y%m%d')
-    print(now_day)
     params = {'d': now_day}
     rep = requests.get(api, params)
     res = rep.json()[now_day]
