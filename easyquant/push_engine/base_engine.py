@@ -1,7 +1,9 @@
 # coding: utf-8
-import time
 from threading import Thread
 
+import aiohttp
+
+import time
 from easyquant.event_engine import Event
 
 
@@ -24,7 +26,10 @@ class BaseEngine:
 
     def push_quotation(self):
         while self.is_active:
-            response_data = self.fetch_quotation()
+            try:
+                response_data = self.fetch_quotation()
+            except aiohttp.errors.ServerDisconnectedError:
+                continue
             event = Event(event_type=self.EventType, data=response_data)
             self.event_engine.put(event)
             time.sleep(self.PushInterval)
