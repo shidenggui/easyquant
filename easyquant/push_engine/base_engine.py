@@ -29,6 +29,7 @@ class BaseEngine:
             try:
                 response_data = self.fetch_quotation()
             except aiohttp.errors.ServerDisconnectedError:
+                time.sleep(self.PushInterval)
                 continue
             event = Event(event_type=self.EventType, data=response_data)
             self.event_engine.put(event)
