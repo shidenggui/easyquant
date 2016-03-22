@@ -53,7 +53,7 @@ class MainEngine:
             quotation_engine.start()
         self.clock_engine.start()
 
-    def load_strategy(self):
+    def load_strategy(self, names=None):
         """动态加载策略"""
         s_folder = 'strategies'
         strategies = os.listdir(s_folder)
@@ -64,9 +64,10 @@ class MainEngine:
             strategy_module = importlib.import_module('.' + strategy_module_name, 'strategies')
             strategy_class = getattr(strategy_module, 'Strategy')
 
-            self.strategies[strategy_module_name] = strategy_class
-            self.strategy_list.append(strategy_class(self.user, log_handler=self.log))
-            self.log.info('加载策略: %s' % strategy_module_name)
+            if names is not None and strategy_class.name in names:
+                self.strategies[strategy_module_name] = strategy_class
+                self.strategy_list.append(strategy_class(self.user, log_handler=self.log))
+                self.log.info('加载策略: %s' % strategy_module_name)
         for strategy in self.strategy_list:
             for quotation_engine in self.quotation_engines:
                 self.event_engine.register(quotation_engine.EventType, strategy.run)

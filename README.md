@@ -219,6 +219,13 @@ class Strategy(StrategyTemplate):
             self.log.info("5分钟")
 ```
 
+#### 加载指定策略
+
+
+```python
+m.load_strategy(names=['测试策略2']) # 指定 names 参数，类型为列表，内容为策略的 name 属性
+```
+
 
 ### log system
 
