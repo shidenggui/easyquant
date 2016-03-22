@@ -54,7 +54,8 @@ class MainEngine:
         self.clock_engine.start()
 
     def load_strategy(self, names=None):
-        """动态加载策略"""
+        """动态加载策略
+        :param names: 策略名列表，元素为策略的 name 属性"""
         s_folder = 'strategies'
         strategies = os.listdir(s_folder)
         strategies = filter(lambda file: file.endswith('.py') and file != '__init__.py', strategies)
