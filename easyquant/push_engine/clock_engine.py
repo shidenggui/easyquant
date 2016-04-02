@@ -51,12 +51,10 @@ class ClockEngine:
                     self.trading_state = True
                     event = Event(event_type=self.EventType, data=Clock(self.trading_state, 'open'))
                     self.event_engine.put(event)
-            else:
-                self.trading_state = False
-                event = Event(event_type=self.EventType, data=Clock(self.trading_state, 'close'))
-                self.event_engine.put(event)
-                sleep_time = etime.calc_next_trade_time_delta_seconds() + 1
-                time.sleep(sleep_time)
+            elif self.trading_state == True:
+                    self.trading_state = False
+                    event = Event(event_type=self.EventType, data=Clock(self.trading_state, 'close'))
+                    self.event_engine.put(event)
 
             time.sleep(self.sleep_time)
 
