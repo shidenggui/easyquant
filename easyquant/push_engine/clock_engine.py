@@ -18,7 +18,7 @@ class ClockEngine:
     EventType = 'clock_tick'
 
     def __init__(self, event_engine):
-        self.start_time = datetime.datetime.now()
+        self.start_time = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         self.event_engine = event_engine
         self.is_active = True
         self.clock_engine_thread = Thread(target=self.clocktick)
@@ -35,28 +35,25 @@ class ClockEngine:
             time_delta = now_time - self.start_time
             seconds_delta = int(time_delta.total_seconds())
 
-            # 防止 seconds_delta 为 0 时 % 都为 0
-            if seconds_delta == 0:
-                seconds_delta += 1
-
             if etime.is_holiday_today():
                 pass
             elif etime.is_tradetime_now():  # 工作日，干活了
                 if self.trading_state == True:
                     for delta in [0.5, 1, 5, 15, 30, 60]:
                         if seconds_delta % (min_seconds * delta) == 0:
-                            event = Event(event_type=self.EventType, data=Clock(self.trading_state, delta))
-                            self.event_engine.put(event)
+                            self.push_event_type(delta)
                 else:
                     self.trading_state = True
-                    event = Event(event_type=self.EventType, data=Clock(self.trading_state, 'open'))
-                    self.event_engine.put(event)
+                    self.push_event_type('open')
             elif self.trading_state == True:
-                    self.trading_state = False
-                    event = Event(event_type=self.EventType, data=Clock(self.trading_state, 'close'))
-                    self.event_engine.put(event)
+                self.trading_state = False
+                self.push_event_type('close')
 
             time.sleep(self.sleep_time)
+
+    def push_event_type(self, etype):
+        event = Event(event_type=self.EventType, data=Clock(self.trading_state, etype))
+        self.event_engine.put(event)
 
     def stop(self):
         self.is_active = False
