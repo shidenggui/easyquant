@@ -58,8 +58,8 @@ def calc_next_trade_time_delta_seconds():
                 break
 
         day_delta = timedelta(days=distance_next_work_day)
-        next_trade_start = (now_time + day_delta).replace(hour=now_time.hour, minute=now_time.minute,
-                                                          second=now_time.second, microsecond=now_time.microsecond)
+        next_trade_start = (now_time + day_delta).replace(hour=9, minute=15,
+                                                          second=0, microsecond=0)
     else:
         return 0
     time_delta = next_trade_start - now_time
