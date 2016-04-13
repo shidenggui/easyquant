@@ -1,25 +1,13 @@
 import datetime
 from datetime import timedelta
-from functools import wraps
+from functools import lru_cache
 
 import requests
 
 import time
 
 
-def memcache(func):
-    cache = {}
-
-    @wraps(func)
-    def wrap(*args):
-        if args not in cache:
-            cache[args] = func(args)
-        return cache[args]
-
-    return wrap
-
-
-@memcache
+@lru_cache()
 def is_holiday(day):
     api = 'http://www.easybots.cn/api/holiday.php'
     params = {'d': day}
