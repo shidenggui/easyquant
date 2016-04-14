@@ -1,9 +1,6 @@
-import time
 from collections import defaultdict
 from queue import Queue, Empty
-from threading import Thread, Timer
-
-from .event_type import EventType
+from threading import Thread
 
 
 class Event:
@@ -12,37 +9,6 @@ class Event:
     def __init__(self, event_type, data=None):
         self.event_type = event_type
         self.data = data
-
-
-class EventTimer:
-    """计时器"""
-
-    def __init__(self, interval_seconds, function):
-        """计时器
-        :param interval_seconds:计时间隔
-        :param function:调用函数
-        """
-        self.__interval = interval_seconds
-        self.__function = function
-        self.is_active = True
-
-    def start(self):
-        self.is_active = True
-        Timer(self.__interval, self.__loop).start()
-
-    def __loop(self):
-        if self.is_active:
-            self.__function()
-            Timer(self.__interval, self.__loop).start()
-
-    def stop(self):
-        self.is_active = False
-
-    def whileloop(self):
-        """取代 Timer 的一种实现"""
-        while self.is_active:
-            self.__function()
-            time.sleep(self.__interval)
 
 
 class EventEngine:
@@ -55,9 +21,6 @@ class EventEngine:
 
         # 事件引擎开关
         self.__active = False
-
-        # 计时器，用于触发计时事件
-        self.__timer = EventTimer(interval_seconds=1, function=self.__on_timer)
 
         # 事件引擎处理线程
         self.__thread = Thread(target=self.__run)
@@ -83,21 +46,14 @@ class EventEngine:
             for handler in self.__handlers[event.event_type]:
                 handler(event)
 
-    def __on_timer(self):
-        """向事件队列中存入计时器事件"""
-        event = Event(event_type=EventType.TIMER)
-        self.put(event)
-
     def start(self):
         """引擎启动"""
         self.__active = True
         self.__thread.start()
-        self.__timer.start()
 
     def stop(self):
         """停止引擎"""
         self.__active = False
-        self.__timer.stop()
         self.__thread.join()
 
     def register(self, event_type, handler):

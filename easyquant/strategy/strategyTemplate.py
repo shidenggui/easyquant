@@ -1,14 +1,18 @@
 # coding:utf-8
-import os
-import sys
-from logbook import Logger, StreamHandler
 
 
 class StrategyTemplate:
-    def __init__(self, user):
+    name = 'DefaultStrategyTemplate'
+
+    def __init__(self, user, log_handler):
         self.user = user
-        self.log = Logger(os.path.basename(__file__))
-        StreamHandler(sys.stdout).push_application()
+        custom_log_handler = self.log_handler()
+        self.log = log_handler if custom_log_handler is None else custom_log_handler
+        self.init()
+
+    def init(self):
+        # 进行相关的初始化操作
+        pass
 
     def strategy(self, event):
         """:param event event.data 为所有股票的信息，结构如下
@@ -53,4 +57,7 @@ class StrategyTemplate:
             self.log.error(e)
 
     def clock(self, event):
+        pass
+
+    def log_handler(self):
         pass
