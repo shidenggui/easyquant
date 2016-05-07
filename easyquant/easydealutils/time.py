@@ -28,6 +28,21 @@ def is_tradetime_now():
         return True
     return False
 
+open_time = (
+    (datetime.time(9, 15, 0), datetime.time(11, 30, 0)),
+    (datetime.time(13, 0, 0), datetime.time(15, 0, 0)),
+)
+def is_tradetime(now_time):
+    """
+    :param now_time: datetime.time()
+    :return:
+    """
+    for begin, end in open_time:
+        if (begin <= now_time < end):
+            return True
+    else:
+        return False
+
 
 def calc_next_trade_time_delta_seconds():
     now_time = datetime.datetime.now()
