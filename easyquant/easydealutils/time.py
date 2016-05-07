@@ -29,6 +29,30 @@ def is_tradetime_now():
     return False
 
 
+def is_pause_now():
+    now_time = time.localtime()
+    now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
+    if (11, 30, 0) <= now < (13, 0, 0):
+        return True
+    return False
+
+
+def is_trade_now():
+    now_time = time.localtime()
+    now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
+    if (12, 59, 30) <= now < (13, 0, 0):
+        return True
+    return False
+
+
+def is_late_day_now(start=(14, 54, 30)):
+    now_time = time.localtime()
+    now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
+    if start <= now < (15, 0, 0):
+        return True
+    return False
+
+
 def calc_next_trade_time_delta_seconds():
     now_time = datetime.datetime.now()
     now = (now_time.hour, now_time.minute, now_time.second)
