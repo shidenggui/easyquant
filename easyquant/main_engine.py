@@ -67,7 +67,7 @@ class MainEngine:
 
             if names is None or strategy_class.name in names:
                 self.strategies[strategy_module_name] = strategy_class
-                self.strategy_list.append(strategy_class(self.user, log_handler=self.log))
+                self.strategy_list.append(strategy_class(self.user, log_handler=self.log, main_engine=self))
                 self.log.info('加载策略: %s' % strategy_module_name)
         for strategy in self.strategy_list:
             for quotation_engine in self.quotation_engines:
