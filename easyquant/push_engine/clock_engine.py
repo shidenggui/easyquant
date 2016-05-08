@@ -32,8 +32,17 @@ class ClockEngine:
         min_seconds = 60
         while self.is_active:
             now_time = datetime.datetime.now()
-            time_delta = now_time - self.start_time
-            seconds_delta = int(time_delta.total_seconds())
+            self.tock(now_time)
+            time.sleep(self.sleep_time)
+
+    def tock(self, now_time):
+        """
+        :param now_time: datetime.datetime()
+        :return:
+        """
+        min_seconds = 60
+        time_delta = now_time - self.start_time
+        seconds_delta = int(time_delta.total_seconds())
 
             if etime.is_holiday_today():
                 pass

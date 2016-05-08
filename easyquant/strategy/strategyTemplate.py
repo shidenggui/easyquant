@@ -8,6 +8,8 @@ class StrategyTemplate:
 
     def __init__(self, user, log_handler, main_engine):
         self.user = user
+        # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
+        self.log = self.log_handler() or log_handler
         self.main_engine = main_engine
         custom_log_handler = self.log_handler()
         self.log = log_handler if custom_log_handler is None else custom_log_handler
@@ -67,4 +69,9 @@ class StrategyTemplate:
         pass
 
     def log_handler(self):
-        pass
+        """
+        优先使用在此自定义 log 句柄, 否则返回None, 并使用主引擎日志句柄
+        :return: log_handler or None
+        """
+        return None
+
