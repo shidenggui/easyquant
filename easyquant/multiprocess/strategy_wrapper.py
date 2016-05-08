@@ -1,15 +1,10 @@
-# !/usr/bin/python
-# vim: set fileencoding=utf8 :
-#
-__author__ = 'keping.chu'
-
-
 import multiprocessing as mp
 from threading import Thread
 
+__author__ = 'keping.chu'
+
 
 class ProcessWrapper(object):
-
     def __init__(self, strategy):
         """
         @:param
@@ -34,14 +29,14 @@ class ProcessWrapper(object):
 
     def on_event(self, event):
         """
-        发消息
+        推送消息
         """
         # print(event)
         self.__event_queue.put(event)
 
     def on_clock(self, event):
         """
-        发时钟
+        推送时钟
         """
         self.__clock_queue.put(event)
 
@@ -50,14 +45,13 @@ class ProcessWrapper(object):
         处理事件
         """
         while True:
-
             try:
                 event = self.__event_queue.get(block=True)
                 # 退出
                 if event == 0:
                     break
                 self.__strategy.run(event)
-            except Exception as e:
+            except:
                 pass
 
     def _process_clock(self):
@@ -72,7 +66,7 @@ class ProcessWrapper(object):
                 if event == 0:
                     break
                 self.__strategy.clock(event)
-            except Exception as e:
+            except:
                 pass
 
     def _process(self):

@@ -8,11 +8,9 @@ class StrategyTemplate:
 
     def __init__(self, user, log_handler, main_engine):
         self.user = user
+        self.main_engine = main_engine
         # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
         self.log = self.log_handler() or log_handler
-        self.main_engine = main_engine
-        custom_log_handler = self.log_handler()
-        self.log = log_handler if custom_log_handler is None else custom_log_handler
 
         self.init()
 
@@ -59,7 +57,7 @@ class StrategyTemplate:
     def run(self, event):
         try:
             self.strategy(event)
-        except Exception as e:
+        except:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             self.log.error(repr(traceback.format_exception(exc_type,
                                                            exc_value,
@@ -74,4 +72,3 @@ class StrategyTemplate:
         :return: log_handler or None
         """
         return None
-
