@@ -10,7 +10,7 @@ from easyquant.push_engine.clock_engine import ClockEngine
 import os
 import importlib
 
-from multiprocess.strategy_wrapper import ProcessWrapper
+from easyquant.multiprocess.strategy_wrapper import ProcessWrapper
 
 
 class FixedMainEngine(MainEngine):
