@@ -23,7 +23,7 @@ class ClockEngine:
         self.is_active = True
         self.clock_engine_thread = Thread(target=self.clocktick)
         self.sleep_time = 1
-        self.trading_state = True if etime.is_tradetime_now() else False
+        self.trading_state = True if etime.is_tradetime(datetime.datetime.now()) else False
 
     def start(self):
         self.clock_engine_thread.start()
@@ -45,20 +45,25 @@ class ClockEngine:
 
         if etime.is_holiday_today():
             pass
-        elif etime.is_tradetime_now():  # 工作日，干活了
+        elif etime.is_tradetime(now_time):  # 工作日，干活了
             if self.trading_state is True:
                 for delta in [0.5, 1, 5, 15, 30, 60]:
+
                     if seconds_delta % (min_seconds * delta) == 0:
                         self.push_event_type(delta)
             else:
                 self.trading_state = True
                 self.push_event_type('open')
-        elif etime.is_pause_now():
+
+        elif etime.is_pause(now_time):
             self.push_event_type('pause')
-        elif etime.is_trade_now():
+
+        elif etime.is_continue(now_time):
             self.push_event_type('continue')
-        elif etime.is_late_day_now():
-            self.push_event_type('late_day')
+
+        elif etime.is_closing(now_time):
+            self.push_event_type('closing')
+
         elif self.trading_state is True:
             self.trading_state = False
             self.push_event_type('close')
