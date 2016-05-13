@@ -44,29 +44,33 @@ class ClockEngine:
         seconds_delta = int(time_delta.total_seconds())
 
         if etime.is_holiday_today():
-            pass
-        elif etime.is_tradetime(now_time):  # 工作日，干活了
-            if self.trading_state is True:
-                for delta in [0.5, 1, 5, 15, 30, 60]:
+            pass    # 假日暂停时钟引擎
+        else:
+            # 工作日，干活了
+            if etime.is_tradetime(now_time):
+                # 交易时间段
+                if self.trading_state is True:
 
-                    if seconds_delta % (min_seconds * delta) == 0:
-                        self.push_event_type(delta)
-            else:
-                self.trading_state = True
-                self.push_event_type('open')
+                    if etime.is_closing(now_time):
+                        self.push_event_type('closing')
 
-        elif etime.is_pause(now_time):
-            self.push_event_type('pause')
+                    for delta in [0.5, 1, 5, 15, 30, 60]:
+                        if seconds_delta % (min_seconds * delta) == 0:
+                            self.push_event_type(delta)
 
-        elif etime.is_continue(now_time):
-            self.push_event_type('continue')
+                else:
+                    self.trading_state = True
+                    self.push_event_type('open')
 
-        elif etime.is_closing(now_time):
-            self.push_event_type('closing')
+            elif etime.is_pause(now_time):
+                self.push_event_type('pause')
 
-        elif self.trading_state is True:
-            self.trading_state = False
-            self.push_event_type('close')
+            elif etime.is_continue(now_time):
+                self.push_event_type('continue')
+
+            elif self.trading_state is True:
+                self.trading_state = False
+                self.push_event_type('close')
 
     def push_event_type(self, etype):
         event = Event(event_type=self.EventType, data=Clock(self.trading_state, etype))

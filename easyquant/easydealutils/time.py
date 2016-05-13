@@ -18,6 +18,7 @@ def is_holiday_today():
     today = datetime.date.today().strftime('%Y%m%d')
     return is_holiday(today)
 
+
 # def is_tradetime_now():
 #     now_time = time.localtime()
 #     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
@@ -43,6 +44,7 @@ def is_tradetime(now_time):
     else:
         return False
 
+
 PAUSE_TIME = (
     (datetime.time(11, 30, 0), datetime.time(12, 59, 30)),
 )
@@ -57,7 +59,8 @@ def is_pause(now_time):
     for b, e in PAUSE_TIME:
         if b <= now < e:
             return True
-    return False
+
+
 # def is_pause_now():
 #     now_time = time.localtime()
 #     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
@@ -76,6 +79,8 @@ def is_continue(now_time):
         if b <= now < e:
             return True
     return False
+
+
 # def is_trade_now():
 #     now_time = time.localtime()
 #     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)

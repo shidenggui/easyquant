@@ -99,9 +99,8 @@ class TestClock(BaseTest):
             self.clock_engine.tock(now_time)
 
         # 等待事件引擎处理
-        while self.main_engine.event_engine.queue_size > 1:
-            pass
-        time.sleep(.1)
+        time.sleep(10)
+
         self.main_engine.event_engine.stop()
 
         # 核对次数, 休市的时候不会统计
@@ -109,11 +108,12 @@ class TestClock(BaseTest):
         self.assertEqual(counts[30], (15 - 9) * 2 + 1 - len(["9:00", "11:30", "12:00", "12:30", "15:00"]))
         self.assertEqual(counts[15],
                          (15 - 9) * 4 + 1 - len(["9:00", "9:15", "11:30", "11:45", "12:00", "12:15", "12:30",
-                                                 "12:45", "13:00", "15:00"]))
+                                                 "12:45", "15:00"]))
 
-        # 开盘收盘, 中午开盘休盘, 必定会触发2次, 如果报错,说明是因为当前时间处于非交易日
-        self.assertEqual(counts['open'], 2)
-        self.assertEqual(counts['pause'], 1)
-        self.assertEqual(counts['continue'], 1)
-        self.assertEqual(counts['closing'], 1)
+        # 开盘收盘, 中午开盘休盘, 必定会触发1次, 如果报错,说明是因为当前时间处于非交易日
+        self.assertEqual(counts['open'], 1)
+        self.assertEqual(counts['closing'], 330)
         self.assertEqual(counts['close'], 1)
+        # 目前的时钟引擎会一直推送 pause 和 continue
+        self.assertEqual(counts['pause'], 5370)
+        self.assertEqual(counts['continue'], 30)
