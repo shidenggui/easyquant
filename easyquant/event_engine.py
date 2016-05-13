@@ -66,7 +66,7 @@ class EventEngine:
         if handler_list is None:
             return
         if handler in handler_list:
-            handler_list.remove(event_type)
+            handler_list.remove(handler)
         if len(handler_list) == 0:
             self.__handlers.pop(event_type)
 
