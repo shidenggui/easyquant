@@ -2,27 +2,25 @@
 """
 演示如何进行单元测试
 """
-
-__author__ = 'Shawn'
-
 import time
 import unittest
 import datetime
 from easyquant.main_engine import MainEngine
 from easyquant.push_engine.clock_engine import ClockEngine
-from easyquant.event_engine import EventEngine
 
+__author__ = 'Shawn'
 
 main_engine = MainEngine('ht')
+
 
 class BaseTest(unittest.TestCase):
     """
     基础的配置
     """
+
     @property
     def main_engine(self):
         return main_engine
-
 
     @property
     def clock_engine(self):
@@ -36,6 +34,7 @@ class TestClock(BaseTest):
     """
     时钟的单元测试
     """
+
     @property
     def main_engine(self):
         return self._main_engine
@@ -51,13 +50,11 @@ class TestClock(BaseTest):
         # 设置为不在交易中
         self.clock_engine.trading_state = False
 
-
     def tearDown(self):
         """
         执行每个单元测试 后 都要执行的逻辑
         :return:
         """
-
 
     def test_tick(self):
         """
@@ -74,14 +71,17 @@ class TestClock(BaseTest):
             30: 0,
             60: 0,
             "open": 0,
+            "pause": 0,
+            "continue": 0,
+            "closing": 0,
             "close": 0,
         }
+
         def count(event):
             # 时钟引擎必定在上述的类型中
             self.assertIn(event.data.clock_event, counts)
             # 计数
             counts[event.data.clock_event] += 1
-
 
         # 注册一个响应时钟事件的函数
         self.main_engine.event_engine.register(ClockEngine.EventType, count)
@@ -99,17 +99,21 @@ class TestClock(BaseTest):
             self.clock_engine.tock(now_time)
 
         # 等待事件引擎处理
-        while self.main_engine.event_engine.queue_size > 1:
-            pass
-        time.sleep(.1)
+        time.sleep(10)
+        print(counts)
         self.main_engine.event_engine.stop()
 
-
         # 核对次数, 休市的时候不会统计
-        self.assertEqual(counts[60], 15 - 9 - len(["9:00", "12:00", "15:00"]))
-        self.assertEqual(counts[30], (15 - 9)*2+1 - len(["9:00", "11:30", "12:00", "12:30", "13:00", "15:00"]))
-        self.assertEqual(counts[15], (15 - 9)*4+1 - len(["9:00", "9:15", "11:30", "11:45", "12:00", "12:15", "12:30", "12:45", "13:00", "15:00"]))
+        self.assertEqual(counts[60], 15 - 9 + 1 - len(["9:00", "12:00", "15:00"]))
+        self.assertEqual(counts[30], (15 - 9) * 2 + 1 - len(["9:00", "11:30", "12:00", "12:30", "15:00"]))
+        self.assertEqual(counts[15],
+                         (15 - 9) * 4 + 1 - len(["9:00", "9:15", "11:30", "11:45", "12:00", "12:15", "12:30",
+                                                 "12:45", "15:00"]))
 
-        # 开盘收盘, 中午开盘休盘, 必定会触发2次, 如果报错,说明是因为当前时间处于非交易日
-        self.assertEqual(counts['open'], 2)
-        self.assertEqual(counts['close'], 2)
+        # 开盘收盘, 中午开盘休盘, 必定会触发1次, 如果报错,说明是因为当前时间处于非交易日
+        self.assertEqual(counts['open'], 1)
+        self.assertEqual(counts['closing'], 330)
+        self.assertEqual(counts['close'], 1)
+        # 目前的时钟引擎会一直推送 pause 和 continue
+        self.assertEqual(counts['pause'], 5370)
+        self.assertEqual(counts['continue'], 30)

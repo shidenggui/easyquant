@@ -15,15 +15,15 @@ from .push_engine.quotation_engine import DefaultQuotationEngine
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
 
-PY_VERSION = sys.version_info[:2]
-if PY_VERSION < (3, 5):
-    raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % PY_VERSION)
+PY_MAJOR_VERSION, PY_MINOR_VERSION = sys.version_info[:2]
+if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
+    raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % (PY_MAJOR_VERSION, PY_MINOR_VERSION))
 
 
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
-    def __init__(self, broker, need_data='me.json', quotation_engines=[DefaultQuotationEngine],
+    def __init__(self, broker, need_data='me.json', quotation_engines=None,
                  log_handler=DefaultLogHandler()):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
@@ -37,6 +37,8 @@ class MainEngine:
 
         self.event_engine = EventEngine()
         self.clock_engine = ClockEngine(self.event_engine)
+
+        quotation_engines = quotation_engines or [DefaultQuotationEngine]
 
         if type(quotation_engines) != list:
             quotation_engines = [quotation_engines]
