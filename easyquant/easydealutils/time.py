@@ -50,7 +50,7 @@ def is_tradetime(now_time):
 def is_pause_now():
     now_time = time.localtime()
     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
-    if (11, 30, 0) <= now < (13, 0, 0):
+    if (11, 30, 0) <= now < (12, 59, 30):
         return True
     return False
 

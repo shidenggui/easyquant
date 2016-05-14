@@ -55,8 +55,12 @@ class ClockEngine:
                 self.push_event_type('open')
         elif etime.is_pause_now():
             self.push_event_type('pause')
+            while etime.is_pause_now():
+                time.sleep(self.sleep_time)
         elif etime.is_trade_now():
             self.push_event_type('continue')
+            while etime.is_trade_now():
+                time.sleep(self.sleep_time)
         elif etime.is_late_day_now():
             self.push_event_type('late_day')
         elif self.trading_state is True:
