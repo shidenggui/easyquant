@@ -58,7 +58,8 @@ class EventEngine:
 
     def register(self, event_type, handler):
         """注册事件处理函数监听"""
-        self.__handlers[event_type].append(handler)
+        if handler not in self.__handlers[event_type]:
+            self.__handlers[event_type].append(handler)
 
     def unregister(self, event_type, handler):
         """注销事件处理函数"""
@@ -66,7 +67,7 @@ class EventEngine:
         if handler_list is None:
             return
         if handler in handler_list:
-            handler_list.remove(event_type)
+            handler_list.remove(handler)
         if len(handler_list) == 0:
             self.__handlers.pop(event_type)
 

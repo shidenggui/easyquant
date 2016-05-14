@@ -43,8 +43,8 @@ class ClockEngine:
         time_delta = now_time - self.start_time
         seconds_delta = int(time_delta.total_seconds())
 
-        if etime.is_holiday_today():
-            pass    # 假日暂停时钟引擎
+        if etime.is_holiday(now_time):
+            pass  # 假日暂停时钟引擎
         else:
             # 工作日，干活了
             if etime.is_tradetime(now_time):

@@ -100,7 +100,7 @@ class TestClock(BaseTest):
 
         # 等待事件引擎处理
         time.sleep(10)
-
+        print(counts)
         self.main_engine.event_engine.stop()
 
         # 核对次数, 休市的时候不会统计

@@ -6,7 +6,7 @@ import requests
 
 
 @lru_cache()
-def is_holiday(day):
+def _is_holiday(day):
     api = 'http://www.easybots.cn/api/holiday.php'
     params = {'d': day}
     rep = requests.get(api, params)
@@ -14,17 +14,10 @@ def is_holiday(day):
     return True if res == "1" else False
 
 
-def is_holiday_today():
-    today = datetime.date.today().strftime('%Y%m%d')
-    return is_holiday(today)
+def is_holiday(now_time):
+    today = now_time.strftime('%Y%m%d')
+    return _is_holiday(today)
 
-
-# def is_tradetime_now():
-#     now_time = time.localtime()
-#     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
-#     if (9, 15, 0) <= now <= (11, 30, 0) or (13, 0, 0) <= now <= (15, 0, 0):
-#         return True
-#     return False
 
 OPEN_TIME = (
     (datetime.time(9, 15, 0), datetime.time(11, 30, 0)),
@@ -61,13 +54,6 @@ def is_pause(now_time):
             return True
 
 
-# def is_pause_now():
-#     now_time = time.localtime()
-#     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
-#     if (11, 30, 0) <= now < (12, 59, 30):
-#         return True
-#     return False
-
 CONTINUE_TIME = (
     (datetime.time(12, 59, 30), datetime.time(13, 0, 0)),
 )
@@ -80,13 +66,6 @@ def is_continue(now_time):
             return True
     return False
 
-
-# def is_trade_now():
-#     now_time = time.localtime()
-#     now = (now_time.tm_hour, now_time.tm_min, now_time.tm_sec)
-#     if (12, 59, 30) <= now < (13, 0, 0):
-#         return True
-#     return False
 
 CLOSE_TIME = (
     datetime.time(15, 0, 0),
