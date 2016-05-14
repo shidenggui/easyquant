@@ -2,6 +2,7 @@ import importlib
 import os
 import sys
 from collections import OrderedDict
+import pathlib
 
 import easytrader
 from logbook import Logger, StreamHandler
@@ -14,24 +15,30 @@ from .push_engine.quotation_engine import DefaultQuotationEngine
 log = Logger(os.path.basename(__file__))
 StreamHandler(sys.stdout).push_application()
 
-PY_VERSION = sys.version_info[:2]
-if PY_VERSION < (3, 5):
-    raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % PY_VERSION)
+PY_MAJOR_VERSION, PY_MINOR_VERSION = sys.version_info[:2]
+if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
+    raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % (PY_MAJOR_VERSION, PY_MINOR_VERSION))
 
 
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
-    def __init__(self, broker, need_data='me.json', quotation_engines=[DefaultQuotationEngine],
+    def __init__(self, broker, need_data='me.json', quotation_engines=None,
                  log_handler=DefaultLogHandler()):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         # 登录账户
         self.user = easytrader.use(broker)
-        self.user.prepare(need_data)
+        need_data_file = pathlib.Path(need_data)
+        if need_data_file.exists():
+            self.user.prepare(need_data)
+        else:
+            log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
 
         self.event_engine = EventEngine()
         self.clock_engine = ClockEngine(self.event_engine)
+
+        quotation_engines = quotation_engines or [DefaultQuotationEngine]
 
         if type(quotation_engines) != list:
             quotation_engines = [quotation_engines]
@@ -67,7 +74,7 @@ class MainEngine:
 
             if names is None or strategy_class.name in names:
                 self.strategies[strategy_module_name] = strategy_class
-                self.strategy_list.append(strategy_class(self.user, log_handler=self.log))
+                self.strategy_list.append(strategy_class(self.user, log_handler=self.log, main_engine=self))
                 self.log.info('加载策略: %s' % strategy_module_name)
         for strategy in self.strategy_list:
             for quotation_engine in self.quotation_engines:

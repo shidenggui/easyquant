@@ -1,13 +1,17 @@
 # coding:utf-8
+import sys
+import traceback
 
 
 class StrategyTemplate:
     name = 'DefaultStrategyTemplate'
 
-    def __init__(self, user, log_handler):
+    def __init__(self, user, log_handler, main_engine):
         self.user = user
-        custom_log_handler = self.log_handler()
-        self.log = log_handler if custom_log_handler is None else custom_log_handler
+        self.main_engine = main_engine
+        # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
+        self.log = self.log_handler() or log_handler
+
         self.init()
 
     def init(self):
@@ -53,11 +57,18 @@ class StrategyTemplate:
     def run(self, event):
         try:
             self.strategy(event)
-        except Exception as e:
-            self.log.error(e)
+        except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            self.log.error(repr(traceback.format_exception(exc_type,
+                                                           exc_value,
+                                                           exc_traceback)))
 
     def clock(self, event):
         pass
 
     def log_handler(self):
-        pass
+        """
+        优先使用在此自定义 log 句柄, 否则返回None, 并使用主引擎日志句柄
+        :return: log_handler or None
+        """
+        return None
