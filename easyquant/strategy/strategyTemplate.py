@@ -52,7 +52,6 @@ class StrategyTemplate:
          'turnover': '420004912',
          'volume': '206390073.351'}}
         """
-        pass
 
     def run(self, event):
         try:

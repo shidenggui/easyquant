@@ -3,10 +3,13 @@
 演示如何进行单元测试
 """
 import time
+import arrow
 import unittest
 import datetime
+from dateutil import tz
 from easyquant.main_engine import MainEngine
 from easyquant.push_engine.clock_engine import ClockEngine
+from easyquant.event_engine import EventEngine
 
 __author__ = 'Shawn'
 
@@ -55,6 +58,19 @@ class TestClock(BaseTest):
         执行每个单元测试 后 都要执行的逻辑
         :return:
         """
+
+    def test_set_now(self):
+        """
+        重设 clock_engine 的时间
+        :return:
+        """
+
+        tzinfo = tz.tzlocal()
+        now = datetime.datetime(2016, 5, 5, 8, 59, 00, tzinfo)
+        clock_engien = ClockEngine(EventEngine(), now, tzinfo)
+
+        # 去掉微秒误差后比较
+        self.assertEqual(clock_engien.now_dt.replace(microsecond=0), now)
 
     def test_tick(self):
         """

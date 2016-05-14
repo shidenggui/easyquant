@@ -24,7 +24,7 @@ class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
     def __init__(self, broker, need_data='me.json', quotation_engines=None,
-                 log_handler=DefaultLogHandler()):
+                 log_handler=DefaultLogHandler(), now=None, tzinfo=None):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         # 登录账户
@@ -36,7 +36,7 @@ class MainEngine:
             log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
 
         self.event_engine = EventEngine()
-        self.clock_engine = ClockEngine(self.event_engine)
+        self.clock_engine = ClockEngine(self.event_engine, now, tzinfo)
 
         quotation_engines = quotation_engines or [DefaultQuotationEngine]
 
