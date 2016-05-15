@@ -243,6 +243,7 @@ class TestClock(BaseTest):
             # 记录补发
             if event.data.clock_event == clock_type:
                 self.active_times += 1
+
         self.main_engine.event_engine.register(ClockEngine.EventType, clock)
 
         self.main_engine.event_engine.start()
@@ -311,8 +312,6 @@ class TestClock(BaseTest):
             time.sleep(0.001)
 
         # 等待事件引擎处理
-        for k, v in counts.items():
-            print(k, [d.strftime("%H:%M:%S") for d in v])
         self.main_engine.event_engine.stop()
 
         # 开盘收盘, 中午开盘休盘, 必定会触发1次
@@ -323,6 +322,6 @@ class TestClock(BaseTest):
 
         # 核对次数, 休市的时候不会统计
         self.assertEqual(len(counts[60]), 15 - 9 + 1 - len(["9:00"]))
-        self.assertEqual(len(counts[30]), (15 - 9) * 2 + 1 - len(["9:00", "11:30", "12:00", "12:30", "15:00"]))
+        self.assertEqual(len(counts[30]), (15 - 9) * 2 + 1 - len(["9:00"]))
         self.assertEqual(len(counts[15]), (15 - 9) * 4 + 1 -
-                         len(["9:00", "9:15", "11:30", "11:45", "12:00", "12:15", "12:30", "12:45", "15:00"]))
+                         len(["9:00"]))
