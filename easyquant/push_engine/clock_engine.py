@@ -1,11 +1,12 @@
 # coding: utf-8
 import datetime
+from collections import deque
 from threading import Thread
-import time
+
 import arrow
 from dateutil import tz
-from collections import deque
 
+import time
 from ..easydealutils import time as etime
 from ..event_engine import Event
 
@@ -60,8 +61,8 @@ class ClockMomentHandler:
         self.makeup = makeup
         self.call = call or (lambda: None)
         self.next_time = datetime.datetime.combine(
-            self.clock_engine.now_dt.date(),
-            self.moment,
+                self.clock_engine.now_dt.date(),
+                self.moment,
         )
 
         if not self.makeup and self.is_active():
@@ -74,8 +75,8 @@ class ClockMomentHandler:
         """
         if self.is_active():
             self.next_time = datetime.datetime.combine(
-                self.next_time.date() + datetime.timedelta(days=1),
-                self.moment
+                    self.next_time.date() + datetime.timedelta(days=1),
+                    self.moment
             )
 
     def is_active(self):
@@ -143,7 +144,7 @@ class ClockEngine:
             return 0
         if now.tzinfo is None:
             now = arrow.get(datetime.datetime(
-                now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond, self.tzinfo,
+                    now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond, self.tzinfo,
             ))
 
         return (arrow.now() - now).total_seconds()
@@ -197,31 +198,6 @@ class ClockEngine:
             else:
                 self.clock_moment_handlers.append(clock_handler)
                 break
-
-                # # 工作日，干活了
-                # if etime.is_tradetime(now_time):
-                #     # 交易时间段
-                #     if self.trading_state is True:
-                #         if etime.is_closing(now_time):
-                #             self.push_event_type('closing')
-                #
-                #         for delta in [0.5, 1, 5, 15, 30, 60]:
-                #             if seconds_delta % (min_seconds * delta) == 0:
-                #                 self.push_event_type(delta)
-                #
-                #     else:
-                #         self.trading_state = True
-                #         self.push_event_type('open')
-                #
-                # elif etime.is_pause(now_time):
-                #     self.push_event_type('pause')
-                #
-                # elif etime.is_continue(now_time):
-                #     self.push_event_type('continue')
-                #
-                # elif self.trading_state is True:
-                #     self.trading_state = False
-                #     self.push_event_type('close')
 
     def push_event_type(self, clock_handler):
         event = Event(event_type=self.EventType, data=Clock(self.trading_state, clock_handler.clock_type))

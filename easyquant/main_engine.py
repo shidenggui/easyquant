@@ -1,8 +1,8 @@
 import importlib
 import os
+import pathlib
 import sys
 from collections import OrderedDict
-import pathlib
 
 import easytrader
 from logbook import Logger, StreamHandler

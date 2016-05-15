@@ -3,14 +3,15 @@
 #
 __author__ = 'keping.chu'
 
-import easyquotation
-from easyquant import PushBaseEngine
-import aiohttp
-# from easyquant.easydealutils import time as work_time
-import time
-from easyquant.event_engine import Event
 import multiprocessing as mp
 from threading import Thread
+
+import aiohttp
+import easyquotation
+
+import time
+from easyquant import PushBaseEngine
+from easyquant.event_engine import Event
 
 
 class FixedDataEngine(PushBaseEngine):
