@@ -44,7 +44,7 @@ class MainEngine:
             quotation_engines = [quotation_engines]
         self.quotation_engines = []
         for quotation_engine in quotation_engines:
-            self.quotation_engines.append(quotation_engine(self.event_engine))
+            self.quotation_engines.append(quotation_engine(self.event_engine, self.clock_engine))
 
         # 保存读取的策略类
         self.strategies = OrderedDict()

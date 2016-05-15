@@ -14,7 +14,6 @@ from threading import Thread, Lock
 
 from easyquant.multiprocess.strategy_wrapper import ProcessWrapper
 
-
 class FixedMainEngine(MainEngine):
 
     def __init__(self, broker, need_data='ht.json', quotation_engines=[FixedDataEngine],
@@ -37,7 +36,7 @@ class FixedMainEngine(MainEngine):
         positions = [p['stock_code'] for p in self.user.position]
         positions.extend(ext_stocks)
         for quotation_engine in quotation_engines:
-            self.quotation_engines.append(quotation_engine(self.event_engine, positions))
+            self.quotation_engines.append(quotation_engine(self.event_engine, self.clock_engine, positions))
 
     def load(self, names, strategy_file):
         with self.lock:
