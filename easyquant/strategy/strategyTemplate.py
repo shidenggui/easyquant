@@ -12,7 +12,6 @@ class StrategyTemplate:
         self.clock_engine = main_engine.clock_engine
         # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
         self.log = self.log_handler() or log_handler
-
         self.init()
 
     def init(self):
