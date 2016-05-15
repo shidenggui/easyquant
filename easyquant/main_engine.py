@@ -23,17 +23,23 @@ if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
-    def __init__(self, broker, need_data='me.json', quotation_engines=None,
+    def __init__(self, broker=None, need_data=None, quotation_engines=None,
                  log_handler=DefaultLogHandler()):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
+        self.log = log_handler
+
         # 登录账户
-        self.user = easytrader.use(broker)
-        need_data_file = pathlib.Path(need_data)
-        if need_data_file.exists():
-            self.user.prepare(need_data)
+        if (broker is not None) and (need_data is not None):
+            self.user = easytrader.use(broker)
+            need_data_file = pathlib.Path(need_data)
+            if need_data_file.exists():
+                self.user.prepare(need_data)
+            else:
+                log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
         else:
-            log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
+            self.user = None
+            self.log.info('选择了无交易模式')
 
         self.event_engine = EventEngine()
         self.clock_engine = ClockEngine(self.event_engine)
@@ -49,7 +55,6 @@ class MainEngine:
         # 保存读取的策略类
         self.strategies = OrderedDict()
         self.strategy_list = list()
-        self.log = log_handler
 
         self.log.info('启动主引擎')
 
