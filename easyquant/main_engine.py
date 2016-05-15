@@ -38,6 +38,7 @@ class MainEngine:
             else:
                 log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
         else:
+            self.user = None
             self.log.info('选择了无交易模式')
 
         self.event_engine = EventEngine()
