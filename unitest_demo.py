@@ -5,7 +5,9 @@
 import time
 import unittest
 import datetime
-import threading
+import pandas as pd
+from easyquant.easydealutils.time import is_holiday
+
 from dateutil import tz
 from easyquant.main_engine import MainEngine
 from easyquant.push_engine.clock_engine import ClockEngine, ClockMomentHandler
@@ -47,10 +49,18 @@ class TestClock(BaseTest):
         执行每个单元测试 前 都要执行的逻辑
         :return:
         """
-        self.trading_date = datetime.date(2016, 5, 5)
+        # 设定下一个交易日
+        self.trade_date = None
+        for date in pd.date_range(datetime.date.today(), periods=10):
+            if not is_holiday(date):
+                self.trade_date = date
+                break
+        else:
+            raise ValueError("无法获得下一个交易日")
+        print(1212, self.trade_date)
         self.time = datetime.time(0, 0, 0, tzinfo=tz.tzlocal())
 
-        now = datetime.datetime.combine(self.trading_date, self.time)
+        now = datetime.datetime.combine(self.trade_date, self.time)
         # 此处重新定义 main_engine
         self._main_engine = MainEngine('ht', now=now)
 
@@ -71,7 +81,7 @@ class TestClock(BaseTest):
 
         tzinfo = tz.tzlocal()
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(8, 59, 00, tzinfo=tzinfo),
         )
         clock_engien = ClockEngine(EventEngine(), now, tzinfo)
@@ -87,7 +97,7 @@ class TestClock(BaseTest):
         tzinfo = tz.tzlocal()
         clock_engien = ClockEngine(EventEngine())
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(8, 59, 00, tzinfo=tzinfo),
         )
         clock_engien.reset_now(now)
@@ -105,7 +115,7 @@ class TestClock(BaseTest):
     def test_clock_moment_is_active(self):
         # 设置时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 58, tzinfo=tz.tzlocal()),
         )
         self.clock_engine.reset_now(now)
@@ -118,7 +128,7 @@ class TestClock(BaseTest):
 
         # 将系统时间设置为触发时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 59, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(now)
@@ -128,7 +138,7 @@ class TestClock(BaseTest):
     def test_clock_update_next_time(self):
         # 设置时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 58, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(now)
@@ -141,7 +151,7 @@ class TestClock(BaseTest):
 
         # 将系统时间设置为触发时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 59, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(now)
@@ -163,7 +173,7 @@ class TestClock(BaseTest):
 
     def register_clock_moent_makeup(self, makeup):
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 59, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(begin)
@@ -195,7 +205,7 @@ class TestClock(BaseTest):
         # 交易触发, 交易阶段
         trading = True
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(9, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -206,7 +216,7 @@ class TestClock(BaseTest):
         # 交易触发, 非交易阶段
         trading = True
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(15, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -217,7 +227,7 @@ class TestClock(BaseTest):
         # 非交易触发, 交易阶段
         trading = False
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(9, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -228,7 +238,7 @@ class TestClock(BaseTest):
         # 非交易触发, 非交易阶段
         trading = False
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(15, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -299,7 +309,7 @@ class TestClock(BaseTest):
 
         # 模拟从开市前1分钟, 即8:59分, 到休市后1分钟的每秒传入时钟接口
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(8, 59, tzinfo=self.clock_engine.tzinfo)
         )
         hours = 15 - 9

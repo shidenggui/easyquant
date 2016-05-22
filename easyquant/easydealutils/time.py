@@ -7,6 +7,7 @@ import requests
 
 @lru_cache()
 def _is_holiday(day):
+    # 该接口可能将于 2016.7.1 过期, 请关注该主页
     api = 'http://www.easybots.cn/api/holiday.php'
     params = {'d': day}
     rep = requests.get(api, params)
