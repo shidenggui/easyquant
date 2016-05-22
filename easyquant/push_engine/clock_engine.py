@@ -3,6 +3,7 @@ import datetime
 from collections import deque
 from threading import Thread
 
+import pandas as pd
 import arrow
 from dateutil import tz
 
@@ -76,8 +77,13 @@ class ClockMomentHandler:
         :return:
         """
         if self.is_active():
+            if self.is_trading_date:
+                next_date = etime.get_next_trade_date(self.clock_engine.now_dt)
+            else:
+                next_date = self.next_time.date() + datetime.timedelta(days=1)
+
             self.next_time = datetime.datetime.combine(
-                    self.next_time.date() + datetime.timedelta(days=1),
+                    next_date,
                     self.moment
             )
 
@@ -85,7 +91,6 @@ class ClockMomentHandler:
         if self.is_trading_date and etime.is_holiday(self.clock_engine.now_dt):
             # 仅在交易日触发时的判断
             return False
-
         return self.next_time <= self.clock_engine.now_dt
 
 

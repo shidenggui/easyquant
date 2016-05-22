@@ -6,7 +6,7 @@ import time
 import unittest
 import datetime
 import pandas as pd
-from easyquant.easydealutils.time import is_holiday
+from easyquant.easydealutils.time import get_next_trade_date, is_trade_date
 
 from dateutil import tz
 from easyquant.main_engine import MainEngine
@@ -50,13 +50,7 @@ class TestClock(BaseTest):
         :return:
         """
         # 设定下一个交易日
-        self.trade_date = None
-        for date in pd.date_range(datetime.date.today(), periods=10):
-            if not is_holiday(date):
-                self.trade_date = date
-                break
-        else:
-            raise ValueError("无法获得下一个交易日")
+        self.trade_date = get_next_trade_date(datetime.date.today())
 
         self.time = datetime.time(0, 0, 0, tzinfo=tz.tzlocal())
 
@@ -66,6 +60,21 @@ class TestClock(BaseTest):
 
         # 设置为不在交易中
         self.clock_engine.trading_state = False
+
+        # 时钟事件计数
+        self.counts = {
+            0.5: [],
+            1: [],
+            5: [],
+            15: [],
+            30: [],
+            60: [],
+            "open": [],
+            "pause": [],
+            "continue": [],
+            "close": [],
+
+        }
 
     def tearDown(self):
         """
@@ -275,25 +284,15 @@ class TestClock(BaseTest):
 
         self.assertEqual(self.active_times, active_times)
 
-    def test_tick(self):
+    def test_tick_interval_event(self):
         """
-        测试时钟接口
+        测试 tick 中的时间间隔事件
+        时间间隔事件
         从开始前1分钟一直到收市后1分钟, 触发所有的已定义时钟事件
         :return:
         """
         # 各个时间间隔的触发次数计数
-        counts = {
-            0.5: [],
-            1: [],
-            5: [],
-            15: [],
-            30: [],
-            60: [],
-            "open": [],
-            "pause": [],
-            "continue": [],
-            "close": [],
-        }
+        counts = self.counts
 
         def count(event):
             # 时钟引擎必定在上述的类型中
@@ -324,14 +323,69 @@ class TestClock(BaseTest):
         # 等待事件引擎处理
         self.main_engine.event_engine.stop()
 
-        # 开盘收盘, 中午开盘休盘, 必定会触发1次
-        self.assertEqual(len(counts['open']), 1)
-        self.assertEqual(len(counts['pause']), 1)
-        self.assertEqual(len(counts['continue']), 1)
-        self.assertEqual(len(counts['close']), 1)
-
         # 核对次数, 休市的时候不会统计
         self.assertEqual(len(counts[60]), 15 - 9 + 1 - len(["9:00"]))
         self.assertEqual(len(counts[30]), (15 - 9) * 2 + 1 - len(["9:00"]))
         self.assertEqual(len(counts[15]), (15 - 9) * 4 + 1 -
                          len(["9:00"]))
+
+
+    def test_tick_moment_event(self):
+        """
+        测试 tick 中的时刻时钟事件
+        时间间隔事件
+        每隔25分钟触发一次,连续进行8天
+        :return:
+        """
+        # 各个时间间隔的触发次数计数
+        counts = self.counts
+        days = 8
+        interval = datetime.timedelta(minutes=25)
+
+        def count(event):
+            # 时钟引擎必定在上述的类型中
+            self.assertIn(event.data.clock_event, counts)
+            # 计数
+            counts[event.data.clock_event].append(self.clock_engine.now_dt)
+
+        # 从 self.trade_date 的零点开始
+        begin = datetime.datetime.combine(
+            self.trade_date,
+            datetime.time(0, 0, tzinfo=self.clock_engine.tzinfo)
+        )
+        # 结束时间为8天后的23:59:59
+        end = (begin + datetime.timedelta(days=days)).replace(hour=23, minute=59, second=59)
+
+        # 重置时间到凌晨
+        self.clock_engine.reset_now(begin)
+
+        # 预估时间事件触发次数, 每个交易日触发一次
+        actived_times = 0
+        for date in pd.date_range(begin.date(), periods=days+1):
+            if is_trade_date(date):
+                actived_times += 1
+
+        # 注册一个响应时钟事件的函数
+        self.main_engine.event_engine.register(ClockEngine.EventType, count)
+
+        # 开启事件引擎
+        self.main_engine.event_engine.start()
+
+        now = begin
+        while 1:
+            self.clock_engine.reset_now(now)
+            self.clock_engine.tock()
+            time.sleep(0.001)
+            now += interval
+            if now >= end:
+                break
+
+        # 等待事件引擎处理
+        self.main_engine.event_engine.stop()
+        print({k: len(v) for k, v in counts.items() if isinstance(k, str)})
+        # 开盘收盘, 中午开盘休盘, 必定会触发1次
+        self.assertEqual(len(counts['open']), actived_times)
+        self.assertEqual(len(counts['pause']), actived_times)
+        self.assertEqual(len(counts['continue']), actived_times)
+        self.assertEqual(len(counts['close']), actived_times)
+
