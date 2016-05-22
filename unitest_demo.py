@@ -50,7 +50,7 @@ class TestClock(BaseTest):
         :return:
         """
         # 设定下一个交易日
-        self.trade_date = get_next_trade_date(datetime.date.today())
+        self.trade_date = get_next_trade_date(datetime.date.today() - datetime.timedelta(days=1))
 
         self.time = datetime.time(0, 0, 0, tzinfo=tz.tzlocal())
 
