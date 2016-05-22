@@ -32,11 +32,6 @@ class ClockIntervalHandler:
         self.call = call or (lambda: None)
 
     def is_active(self):
-        # TODO 测试代码
-        if self.clock_type == 60:
-            if int(self.clock_engine.now) % self.second == 0:
-                print(self.trading, self.clock_engine.now_dt, self.clock_engine.trading_state)
-
         if self.trading:
             if not self.clock_engine.trading_state:
                 return False

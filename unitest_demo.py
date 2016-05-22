@@ -57,7 +57,7 @@ class TestClock(BaseTest):
                 break
         else:
             raise ValueError("无法获得下一个交易日")
-        print(1212, self.trade_date)
+
         self.time = datetime.time(0, 0, 0, tzinfo=tz.tzlocal())
 
         now = datetime.datetime.combine(self.trade_date, self.time)
