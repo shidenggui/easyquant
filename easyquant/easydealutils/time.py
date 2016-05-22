@@ -1,5 +1,5 @@
 import datetime
-from datetime import timedelta
+import doctest
 from functools import lru_cache
 
 import requests
@@ -7,6 +7,7 @@ import requests
 
 @lru_cache()
 def _is_holiday(day):
+    # 该接口可能将于 2016.7.1 过期, 请关注该主页
     api = 'http://www.easybots.cn/api/holiday.php'
     params = {'d': day}
     rep = requests.get(api, params)
@@ -17,6 +18,33 @@ def _is_holiday(day):
 def is_holiday(now_time):
     today = now_time.strftime('%Y%m%d')
     return _is_holiday(today)
+
+
+def is_trade_date(now_time):
+    return not is_holiday(now_time)
+
+
+def get_next_trade_date(now_time):
+    """
+    :param now_time: datetime.datetime
+    :return:
+    >>> import datetime
+    >>> get_next_trade_date(datetime.date(2016, 5, 5))
+    datetime.date(2016, 5, 6)
+    """
+    now = now_time
+    max_days = 365
+    days = 0
+    while 1:
+        days += 1
+        now += datetime.timedelta(days=1)
+        if is_trade_date(now):
+            if isinstance(now, datetime.date):
+                return now
+            else:
+                return now.date()
+        if days > max_days:
+            raise ValueError('无法确定 %s 下一个交易日' % now_time)
 
 
 OPEN_TIME = (
@@ -79,27 +107,5 @@ def is_closing(now_time, start=datetime.time(14, 54, 30)):
             return True
     return False
 
-
-# def calc_next_trade_time_delta_seconds():
-#     now_time = datetime.datetime.now()
-#     now = (now_time.hour, now_time.minute, now_time.second)
-#     if now < (9, 15, 0):
-#         next_trade_start = now_time.replace(hour=9, minute=15, second=0, microsecond=0)
-#     elif (12, 0, 0) < now < (13, 0, 0):
-#         next_trade_start = now_time.replace(hour=13, minute=0, second=0, microsecond=0)
-#     elif now > (15, 0, 0):
-#         distance_next_work_day = 1
-#         while True:
-#             target_day = now_time + timedelta(days=distance_next_work_day)
-#             if is_holiday(target_day.strftime('%Y%m%d')):
-#                 distance_next_work_day += 1
-#             else:
-#                 break
-#
-#         day_delta = timedelta(days=distance_next_work_day)
-#         next_trade_start = (now_time + day_delta).replace(hour=9, minute=15,
-#                                                           second=0, microsecond=0)
-#     else:
-#         return 0
-#     time_delta = next_trade_start - now_time
-#     return time_delta.total_seconds()
+if __name__ == "__main__":
+    doctest.testmod()
