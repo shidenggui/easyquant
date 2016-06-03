@@ -3,6 +3,7 @@ import os
 import pathlib
 import sys
 from collections import OrderedDict
+import dill
 
 import easytrader
 from logbook import Logger, StreamHandler
@@ -19,6 +20,7 @@ PY_MAJOR_VERSION, PY_MINOR_VERSION = sys.version_info[:2]
 if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
     raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % (PY_MAJOR_VERSION, PY_MINOR_VERSION))
 
+ACCOUNT_OBJECT_FILE = 'account.session'
 
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
@@ -35,6 +37,8 @@ class MainEngine:
             need_data_file = pathlib.Path(need_data)
             if need_data_file.exists():
                 self.user.prepare(need_data)
+                with open(ACCOUNT_OBJECT_FILE, 'wb') as f:
+                    dill.dump(self.user, f)
             else:
                 log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
         else:
@@ -79,7 +83,7 @@ class MainEngine:
 
             if names is None or strategy_class.name in names:
                 self.strategies[strategy_module_name] = strategy_class
-                self.strategy_list.append(strategy_class(self.user, log_handler=self.log, main_engine=self))
+                self.strategy_list.append(strategy_class(log_handler=self.log, main_engine=self))
                 self.log.info('加载策略: %s' % strategy_module_name)
         for strategy in self.strategy_list:
             for quotation_engine in self.quotation_engines:
