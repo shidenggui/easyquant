@@ -86,7 +86,7 @@ class MainEngine:
                 self.strategy_list.append(strategy_class(log_handler=self.log, main_engine=self))
                 self.log.info('加载策略: %s' % strategy_module_name)
         for strategy in self.strategy_list:
+            self.event_engine.register(ClockEngine.EventType, strategy.clock)
             for quotation_engine in self.quotation_engines:
                 self.event_engine.register(quotation_engine.EventType, strategy.run)
-            self.event_engine.register(ClockEngine.EventType, strategy.clock)
         self.log.info('加载策略完毕')
