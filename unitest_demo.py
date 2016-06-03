@@ -5,7 +5,9 @@
 import time
 import unittest
 import datetime
-import threading
+import pandas as pd
+from easyquant.easydealutils.time import get_next_trade_date, is_trade_date
+
 from dateutil import tz
 from easyquant.main_engine import MainEngine
 from easyquant.push_engine.clock_engine import ClockEngine, ClockMomentHandler
@@ -47,15 +49,32 @@ class TestClock(BaseTest):
         执行每个单元测试 前 都要执行的逻辑
         :return:
         """
-        self.trading_date = datetime.date(2016, 5, 5)
+        # 设定下一个交易日
+        self.trade_date = get_next_trade_date(datetime.date.today() - datetime.timedelta(days=1))
+
         self.time = datetime.time(0, 0, 0, tzinfo=tz.tzlocal())
 
-        now = datetime.datetime.combine(self.trading_date, self.time)
+        now = datetime.datetime.combine(self.trade_date, self.time)
         # 此处重新定义 main_engine
         self._main_engine = MainEngine('ht', now=now)
 
         # 设置为不在交易中
         self.clock_engine.trading_state = False
+
+        # 时钟事件计数
+        self.counts = {
+            0.5: [],
+            1: [],
+            5: [],
+            15: [],
+            30: [],
+            60: [],
+            "open": [],
+            "pause": [],
+            "continue": [],
+            "close": [],
+
+        }
 
     def tearDown(self):
         """
@@ -71,7 +90,7 @@ class TestClock(BaseTest):
 
         tzinfo = tz.tzlocal()
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(8, 59, 00, tzinfo=tzinfo),
         )
         clock_engien = ClockEngine(EventEngine(), now, tzinfo)
@@ -87,7 +106,7 @@ class TestClock(BaseTest):
         tzinfo = tz.tzlocal()
         clock_engien = ClockEngine(EventEngine())
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(8, 59, 00, tzinfo=tzinfo),
         )
         clock_engien.reset_now(now)
@@ -105,7 +124,7 @@ class TestClock(BaseTest):
     def test_clock_moment_is_active(self):
         # 设置时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 58, tzinfo=tz.tzlocal()),
         )
         self.clock_engine.reset_now(now)
@@ -118,7 +137,7 @@ class TestClock(BaseTest):
 
         # 将系统时间设置为触发时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 59, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(now)
@@ -128,7 +147,7 @@ class TestClock(BaseTest):
     def test_clock_update_next_time(self):
         # 设置时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 58, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(now)
@@ -141,7 +160,7 @@ class TestClock(BaseTest):
 
         # 将系统时间设置为触发时间
         now = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 59, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(now)
@@ -163,7 +182,7 @@ class TestClock(BaseTest):
 
     def register_clock_moent_makeup(self, makeup):
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(23, 59, 59, tzinfo=tz.tzlocal())
         )
         self.clock_engine.reset_now(begin)
@@ -195,7 +214,7 @@ class TestClock(BaseTest):
         # 交易触发, 交易阶段
         trading = True
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(9, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -206,7 +225,7 @@ class TestClock(BaseTest):
         # 交易触发, 非交易阶段
         trading = True
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(15, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -217,7 +236,7 @@ class TestClock(BaseTest):
         # 非交易触发, 交易阶段
         trading = False
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(9, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -228,7 +247,7 @@ class TestClock(BaseTest):
         # 非交易触发, 非交易阶段
         trading = False
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(15, 15, 0, tzinfo=tz.tzlocal())
         )
         # 确认在交易中
@@ -265,25 +284,15 @@ class TestClock(BaseTest):
 
         self.assertEqual(self.active_times, active_times)
 
-    def test_tick(self):
+    def test_tick_interval_event(self):
         """
-        测试时钟接口
+        测试 tick 中的时间间隔事件
+        时间间隔事件
         从开始前1分钟一直到收市后1分钟, 触发所有的已定义时钟事件
         :return:
         """
         # 各个时间间隔的触发次数计数
-        counts = {
-            0.5: [],
-            1: [],
-            5: [],
-            15: [],
-            30: [],
-            60: [],
-            "open": [],
-            "pause": [],
-            "continue": [],
-            "close": [],
-        }
+        counts = self.counts
 
         def count(event):
             # 时钟引擎必定在上述的类型中
@@ -299,7 +308,7 @@ class TestClock(BaseTest):
 
         # 模拟从开市前1分钟, 即8:59分, 到休市后1分钟的每秒传入时钟接口
         begin = datetime.datetime.combine(
-            self.trading_date,
+            self.trade_date,
             datetime.time(8, 59, tzinfo=self.clock_engine.tzinfo)
         )
         hours = 15 - 9
@@ -314,14 +323,69 @@ class TestClock(BaseTest):
         # 等待事件引擎处理
         self.main_engine.event_engine.stop()
 
-        # 开盘收盘, 中午开盘休盘, 必定会触发1次
-        self.assertEqual(len(counts['open']), 1)
-        self.assertEqual(len(counts['pause']), 1)
-        self.assertEqual(len(counts['continue']), 1)
-        self.assertEqual(len(counts['close']), 1)
-
         # 核对次数, 休市的时候不会统计
         self.assertEqual(len(counts[60]), 15 - 9 + 1 - len(["9:00"]))
         self.assertEqual(len(counts[30]), (15 - 9) * 2 + 1 - len(["9:00"]))
         self.assertEqual(len(counts[15]), (15 - 9) * 4 + 1 -
                          len(["9:00"]))
+
+
+    def test_tick_moment_event(self):
+        """
+        测试 tick 中的时刻时钟事件
+        时间间隔事件
+        每隔25分钟触发一次,连续进行8天
+        :return:
+        """
+        # 各个时间间隔的触发次数计数
+        counts = self.counts
+        days = 8
+        interval = datetime.timedelta(minutes=25)
+
+        def count(event):
+            # 时钟引擎必定在上述的类型中
+            self.assertIn(event.data.clock_event, counts)
+            # 计数
+            counts[event.data.clock_event].append(self.clock_engine.now_dt)
+
+        # 从 self.trade_date 的零点开始
+        begin = datetime.datetime.combine(
+            self.trade_date,
+            datetime.time(0, 0, tzinfo=self.clock_engine.tzinfo)
+        )
+        # 结束时间为8天后的23:59:59
+        end = (begin + datetime.timedelta(days=days)).replace(hour=23, minute=59, second=59)
+
+        # 重置时间到凌晨
+        self.clock_engine.reset_now(begin)
+
+        # 预估时间事件触发次数, 每个交易日触发一次
+        actived_times = 0
+        for date in pd.date_range(begin.date(), periods=days+1):
+            if is_trade_date(date):
+                actived_times += 1
+
+        # 注册一个响应时钟事件的函数
+        self.main_engine.event_engine.register(ClockEngine.EventType, count)
+
+        # 开启事件引擎
+        self.main_engine.event_engine.start()
+
+        now = begin
+        while 1:
+            self.clock_engine.reset_now(now)
+            self.clock_engine.tock()
+            time.sleep(0.001)
+            now += interval
+            if now >= end:
+                break
+
+        # 等待事件引擎处理
+        self.main_engine.event_engine.stop()
+        print({k: len(v) for k, v in counts.items() if isinstance(k, str)})
+        # 开盘收盘, 中午开盘休盘, 必定会触发1次
+        self.assertEqual(len(counts['open']), actived_times)
+        self.assertEqual(len(counts['pause']), actived_times)
+        self.assertEqual(len(counts['continue']), actived_times)
+        self.assertEqual(len(counts['close']), actived_times)
+
