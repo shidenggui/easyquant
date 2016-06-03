@@ -1,3 +1,7 @@
+numpy
+python_dateutil
+pytz
+pandas
 requests
 logbook
 anyjson
@@ -5,3 +9,5 @@ aiohttp
 easytrader
 easyquotation
 arrow
+tushare
+xlrd

@@ -1,10 +1,13 @@
 # coding: utf-8
+import dill
 from threading import Thread
 
 import aiohttp
 
 import time
 from easyquant.event_engine import Event
+
+ACCOUNT_OBJECT_FILE = 'account.session'
 
 
 class BaseEngine:
@@ -13,6 +16,8 @@ class BaseEngine:
     PushInterval = 1
 
     def __init__(self, event_engine, clock_engine):
+        with open(ACCOUNT_OBJECT_FILE, 'rb') as f:
+            self.user = dill.load(f)
         self.event_engine = event_engine
         self.clock_engine = clock_engine
         self.is_active = True
