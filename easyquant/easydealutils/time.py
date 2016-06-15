@@ -20,12 +20,8 @@ def is_holiday(now_time):
     return _is_holiday(today)
 
 
-def is_weekend(now_time):
-    return now_time.weekday() >= 5
-
-
 def is_trade_date(now_time):
-    return not (is_holiday(now_time) or is_weekend(now_time))
+    return not is_holiday(now_time)
 
 
 def get_next_trade_date(now_time):
