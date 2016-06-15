@@ -88,7 +88,7 @@ class ClockMomentHandler:
             )
 
     def is_active(self):
-        if self.is_trading_date and etime.is_holiday(self.clock_engine.now_dt):
+        if self.is_trading_date and not etime.is_trade_date(self.clock_engine.now_dt):
             # 仅在交易日触发时的判断
             return False
         return self.next_time <= self.clock_engine.now_dt
@@ -116,11 +116,12 @@ class ClockEngine:
         self.is_active = True
         self.clock_engine_thread = Thread(target=self.clocktick)
         self.sleep_time = 1
-        self.trading_state = True if etime.is_tradetime(datetime.datetime.now()) else False
+        self.trading_state = True if (etime.is_tradetime(datetime.datetime.now()) and etime.is_trade_date(datetime.datetime.now())) else False
         self.clock_moment_handlers = deque()
         self.clock_interval_handlers = set()
 
-        self._init_clock_handler()
+        if self.trading_state:
+            self._init_clock_handler()
 
     def _init_clock_handler(self):
         """
@@ -192,7 +193,7 @@ class ClockEngine:
             time.sleep(self.sleep_time)
 
     def tock(self):
-        if etime.is_holiday(self.now_dt):
+        if not etime.is_trade_date(self.now_dt):
             pass  # 假日暂停时钟引擎
         else:
             self._tock()
