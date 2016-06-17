@@ -230,7 +230,7 @@ class ClockEngine:
         return etime.is_tradetime(self.now_dt)
 
     def register_moment(self, clock_type, moment, makeup=False):
-        return self._register_moment(clock_type, moment, makeup)
+        return self._register_moment(clock_type, moment, makeup=markup)
 
     def _register_moment(self, clock_type, moment, is_trading_date=True, makeup=False, call=None):
         handlers = list(self.clock_moment_handlers)
