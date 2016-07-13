@@ -15,7 +15,8 @@ from easyquant.event_engine import EventEngine
 
 __author__ = 'Shawn'
 
-main_engine = MainEngine('ht')
+# 需要制定一个有效的证券账户信息
+main_engine = MainEngine('ht', "tmp/ht.json")
 
 
 class BaseTest(unittest.TestCase):
