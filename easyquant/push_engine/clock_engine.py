@@ -120,8 +120,7 @@ class ClockEngine:
         self.clock_moment_handlers = deque()
         self.clock_interval_handlers = set()
 
-        if self.trading_state:
-            self._init_clock_handler()
+        self._init_clock_handler()
 
     def _init_clock_handler(self):
         """
