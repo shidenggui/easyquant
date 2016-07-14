@@ -4,9 +4,11 @@
 """
 import time
 import unittest
+from unittest import mock
 import datetime
 import pandas as pd
 from easyquant.easydealutils.time import get_next_trade_date, is_trade_date
+import arrow
 
 from dateutil import tz
 from easyquant.main_engine import MainEngine
@@ -57,7 +59,7 @@ class TestClock(BaseTest):
 
         now = datetime.datetime.combine(self.trade_date, self.time)
         # 此处重新定义 main_engine
-        self._main_engine = MainEngine('ht', now=now)
+        self._main_engine = MainEngine('ht', 'tmp/ht.json')
 
         # 设置为不在交易中
         self.clock_engine.trading_state = False
@@ -86,41 +88,24 @@ class TestClock(BaseTest):
     def test_set_now(self):
         """
         重设 clock_engine 的时间
-        :return:
-        """
-
-        tzinfo = tz.tzlocal()
-        now = datetime.datetime.combine(
-            self.trade_date,
-            datetime.time(8, 59, 00, tzinfo=tzinfo),
-        )
-        clock_engien = ClockEngine(EventEngine(), now, tzinfo)
-
-        # 去掉微秒误差后比较
-        self.assertEqual(clock_engien.now_dt.replace(microsecond=0), now)
-
-    def test_reset_now(self):
-        """
-        重设时钟引擎当前时间为其他时间点
+        通过 mock 来重设时间戳
+        mock 只能重设 time.time 函数的时间戳,但是不能重设 datetime.datetime.now 函数的时间戳,详情见:
+        http://stackoverflow.com/questions/4481954/python-trying-to-mock-datetime-date-today-but-not-working
         :return:
         """
         tzinfo = tz.tzlocal()
-        clock_engien = ClockEngine(EventEngine())
-        now = datetime.datetime.combine(
-            self.trade_date,
-            datetime.time(8, 59, 00, tzinfo=tzinfo),
-        )
-        clock_engien.reset_now(now)
+        # 使用datetime 类构建时间戳,转化为浮点数时间戳
+        now = datetime.datetime(1990, 10, 16, 19, 27, 16)
 
-        # 去掉微秒误差后比较
-        self.assertEqual(clock_engien.now_dt.replace(microsecond=0), now)
+        # 通过mock ,将 time.time() 函数的返回值重设为上面的打算模拟的值
+        time.time = mock.Mock(return_value=now)
 
-        # 重设为当前时间
-        clock_engien.reset_now()
-        now = datetime.datetime.now(tzinfo).replace(microsecond=0)
+        # 生成一个时钟引擎
+        clock_engien = ClockEngine(EventEngine(), tzinfo)
 
-        # 去掉微秒误差后比较
-        self.assertEqual(clock_engien.now_dt.replace(microsecond=0), now)
+        # 去掉微秒误差后验证其数值
+        self.assertEqual(clock_engien.now, now)                     # time.time 时间戳
+        self.assertEqual(clock_engien.now_dt, arrow.get(now))       # datetime 时间戳
 
     def test_clock_moment_is_active(self):
         # 设置时间
