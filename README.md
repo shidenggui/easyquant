@@ -311,10 +311,33 @@ m = easyquant.MainEngine(broker, need_data, quotation_engine=[DefaultQuotationEn
 #### 时间戳单元测试
 
 1. 请通过 clock_engine 中的 .now 或者 .now_dt 接口,以及 time.time() 接口来获得时间戳.
-2. 通过上述接口获得时间戳,可以在单元测试中模拟某个时刻或者一段时间,详见
+2. 通过上述接口获得时间戳,可以在单元测试中模拟某个时刻或者一段时间,详见单元测试[test_set_now](*https://github.com/lamter/easyquant/blob/master/unitest_demo.py)
 
 ```python
-from easyquant import DefaultQuotationEngine
+from unittest import mock
 
-m = easyquant.MainEngine(broker, need_data, quotation_engine=[DefaultQuotationEngine, LFEngine, OtherEngine])
+# 使用datetime 类构建时间戳
+tzinfo = tz.tzlocal()       # 时区
+now = datetime.datetime(2016, 7, 14, 8, 59, 50, tzinfo=tzinfo)
+
+# 通过mock ,将 time.time() 函数的返回值重设为上面的打算模拟的值,注意要转化为浮点数时间戳
+time.time = mock.Mock(return_value=now.timestamp())
+
+# 生成一个时钟引擎
+clock_engien = ClockEngine(EventEngine(), tzinfo)
+
+# 此时通过 time.time 获得的时间戳,都是上面的预设值
+clock_engien.now == now.timestamp()         # time.time 时间戳
+clock_engien.now_dt == now                  # datetime 时间戳
+
+# 据此可以模拟一段时间内各个闹钟事件的触发,比如模拟开市9:00一直到休市15:00
+begin = datetime.datetime(2016, 7, 14, 8, 59, 50, tzinfo=tzinfo).timestamp()
+end = datetime.datetime(2016, 7, 14, 15, 00, 10, tzinfo=tzinfo).timestamp()
+
+for pass_seconds in range(end-begin):
+    # 时间逐秒往前
+    now = begin + pass_seconds
+    time.time = mock.Mock(return_value=now.timestamp())
+    # 每秒触发一次 tick_tock
+    clock_engien.tock()
 ```
