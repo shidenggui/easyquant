@@ -307,3 +307,14 @@ from easyquant import DefaultQuotationEngine
 
 m = easyquant.MainEngine(broker, need_data, quotation_engine=[DefaultQuotationEngine, LFEngine, OtherEngine])
 ```
+
+#### 时间戳单元测试
+
+1. 请通过 clock_engine 中的 .now 或者 .now_dt 接口,以及 time.time() 接口来获得时间戳.
+2. 通过上述接口获得时间戳,可以在单元测试中模拟某个时刻或者一段时间,详见
+
+```python
+from easyquant import DefaultQuotationEngine
+
+m = easyquant.MainEngine(broker, need_data, quotation_engine=[DefaultQuotationEngine, LFEngine, OtherEngine])
+```
