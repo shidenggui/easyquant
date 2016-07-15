@@ -148,16 +148,6 @@ class ClockEngine:
         for interval in (0.5, 1, 5, 15, 30, 60):
             self.register_interval(interval)
 
-    # def _delta(self, now):
-    #     if now is None:
-    #         return 0
-    #     if now.tzinfo is None:
-    #         now = arrow.get(datetime.datetime(
-    #                 now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond, self.tzinfo,
-    #         ))
-    #
-    #     return (arrow.now() - now).total_seconds()
-
     @property
     def now(self):
         """
@@ -172,14 +162,6 @@ class ClockEngine:
         :return: datetime 类型, 带时区的时间戳.建议使用 arrow 库
         """
         return arrow.get(self.now).to(self.tzinfo)
-
-    # def reset_now(self, now=None):
-    #     """
-    #     调试用接口,请勿在生产环境使用
-    #     :param now:
-    #     :return:
-    #     """
-    #     self.time_delta = self._delta(now)
 
     def start(self):
         self.clock_engine_thread.start()
