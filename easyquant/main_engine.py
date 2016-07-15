@@ -26,7 +26,7 @@ class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
     def __init__(self, broker=None, need_data=None, quotation_engines=None,
-                 log_handler=DefaultLogHandler(), now=None, tzinfo=None):
+                 log_handler=DefaultLogHandler(), tzinfo=None):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         self.log = log_handler
@@ -46,7 +46,7 @@ class MainEngine:
             self.log.info('选择了无交易模式')
 
         self.event_engine = EventEngine()
-        self.clock_engine = ClockEngine(self.event_engine, now, tzinfo)
+        self.clock_engine = ClockEngine(self.event_engine, tzinfo)
 
         quotation_engines = quotation_engines or [DefaultQuotationEngine]
 
