@@ -4,14 +4,6 @@ import sys
 import redis
 import json
 
-from ..log_handler import DefaultLogHandler
-
-"""Debug"""
-"""
-sys.path.append('..')
-from log_handler import DefaultLogHandler
-"""
-
 class RedisIo(object):
     """Redis操作类"""
     
@@ -21,7 +13,6 @@ class RedisIo(object):
             self.r = redis.Redis(host=self.config['redisip'], port=self.config['redisport'], db=self.config['db'])
         else:
             self.r = redis.Redis(host=self.config['redisip'], port=self.config['redisport'], db=self.config['db'], password = self.config['passwd'])
-        self.log = self.log_handler()
     
     def file2dict(self, path):
         #读取配置文件
@@ -35,8 +26,6 @@ class RedisIo(object):
     def lookup_redist_info(self):
         #查询Redis配置
         info = self.r.info()
-        for key in info:
-            self.log.info('%s:%s' % (key, info[key]))
 
     def set_key_value(self, key, value):
         #设置键值对key<-->value
@@ -70,18 +59,13 @@ class RedisIo(object):
         #获取队列长度
         return self.r.llen(listname)
    
-    def log_handler(self):
-        #重定向日志
-        return DefaultLogHandler()
 
 def main():
     ri = RedisIo('redis.conf')
     ri.lookup_redist_info()
     ri.set_key_value('test1', 1)
-    ri.log.info(ri.get_key_value('test1'))
     ri.push_list_value('test2', 1)
     ri.push_list_value('test2', 2)
-    ri.log.info(ri.pull_list_range('test2',0,-1))
 
 if __name__ == '__main__':
     main()
