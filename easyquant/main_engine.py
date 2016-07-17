@@ -2,6 +2,7 @@ import importlib
 import os
 import pathlib
 import sys
+import time
 from collections import OrderedDict
 import dill
 
@@ -65,6 +66,7 @@ class MainEngine:
     def start(self):
         """启动主引擎"""
         self.event_engine.start()
+        time.sleep(10)
         for quotation_engine in self.quotation_engines:
             quotation_engine.start()
         self.clock_engine.start()
