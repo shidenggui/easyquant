@@ -31,6 +31,7 @@ class MainEngine:
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         self.log = log_handler
+        self.broker = broker
 
         # 登录账户
         if (broker is not None) and (need_data is not None):
@@ -66,7 +67,9 @@ class MainEngine:
     def start(self):
         """启动主引擎"""
         self.event_engine.start()
-        time.sleep(10)
+        if self.broker == 'gf':
+            self.log.warn("sleep 10s 等待 gf 账户加载")
+            time.sleep(10)
         for quotation_engine in self.quotation_engines:
             quotation_engine.start()
         self.clock_engine.start()
