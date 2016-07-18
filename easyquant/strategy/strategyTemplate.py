@@ -1,17 +1,21 @@
 # coding:utf-8
 import sys
 import traceback
+import dill
+
+ACCOUNT_OBJECT_FILE = 'account.session'
 
 
 class StrategyTemplate:
     name = 'DefaultStrategyTemplate'
 
-    def __init__(self, user, log_handler, main_engine):
-        self.user = user
+    def __init__(self, log_handler, main_engine):
+        with open(ACCOUNT_OBJECT_FILE, 'rb') as f:
+            self.user = dill.load(f)
         self.main_engine = main_engine
+        self.clock_engine = main_engine.clock_engine
         # 优先使用自定义 log 句柄, 否则使用主引擎日志句柄
         self.log = self.log_handler() or log_handler
-
         self.init()
 
     def init(self):
@@ -52,7 +56,6 @@ class StrategyTemplate:
          'turnover': '420004912',
          'volume': '206390073.351'}}
         """
-        pass
 
     def run(self, event):
         try:

@@ -1,3 +1,4 @@
+account.session
 yjb_account.json
 account.json
 .idea
@@ -10,6 +11,8 @@ __pycache__/
 account.json
 # C extensions
 *.so
+tmp/
+log/
 
 # Distribution / packaging
 .Python

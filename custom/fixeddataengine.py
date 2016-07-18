@@ -3,30 +3,31 @@
 #
 __author__ = 'keping.chu'
 
-import easyquotation
-from easyquant import PushBaseEngine
-import aiohttp
-from easyquant.easydealutils import time as work_time
-import time
-from easyquant.event_engine import Event
 import multiprocessing as mp
 from threading import Thread
+
+import aiohttp
+import easyquotation
+
+import time
+from easyquant import PushBaseEngine
+from easyquant.event_engine import Event
 
 
 class FixedDataEngine(PushBaseEngine):
     EventType = 'custom'
     PushInterval = 15
 
-    def __init__(self, event_engine, watch_stocks=None, s='sina'):
+    def __init__(self, event_engine, clock_engine, watch_stocks=None, s='sina'):
 
         self.watch_stocks = watch_stocks
         self.s = s
         self.source = None
         self.__queue = mp.Queue(1000)
-        self.is_pause = False if work_time.is_tradetime_now() else True
+        self.is_pause = not clock_engine.is_tradetime_now()
         self._control_thread = Thread(target=self._process_control)
         self._control_thread.start()
-        super(FixedDataEngine, self).__init__(event_engine)
+        super(FixedDataEngine, self).__init__(event_engine, clock_engine)
 
     def _process_control(self):
 
