@@ -2,6 +2,7 @@ import importlib
 import os
 import pathlib
 import sys
+import time
 from collections import OrderedDict
 import dill
 
@@ -26,10 +27,11 @@ class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
     def __init__(self, broker=None, need_data=None, quotation_engines=None,
-                 log_handler=DefaultLogHandler(), now=None, tzinfo=None):
+                 log_handler=DefaultLogHandler(), tzinfo=None):
         """初始化事件 / 行情 引擎并启动事件引擎
         """
         self.log = log_handler
+        self.broker = broker
 
         # 登录账户
         if (broker is not None) and (need_data is not None):
@@ -46,7 +48,7 @@ class MainEngine:
             self.log.info('选择了无交易模式')
 
         self.event_engine = EventEngine()
-        self.clock_engine = ClockEngine(self.event_engine, now, tzinfo)
+        self.clock_engine = ClockEngine(self.event_engine, tzinfo)
 
         quotation_engines = quotation_engines or [DefaultQuotationEngine]
 
@@ -65,6 +67,9 @@ class MainEngine:
     def start(self):
         """启动主引擎"""
         self.event_engine.start()
+        if self.broker == 'gf':
+            self.log.warn("sleep 10s 等待 gf 账户加载")
+            time.sleep(10)
         for quotation_engine in self.quotation_engines:
             quotation_engine.start()
         self.clock_engine.start()
