@@ -73,9 +73,9 @@ class ProcessWrapper(object):
         """
         启动进程
         """
-        event_thread = Thread(target=self._process_event)
+        event_thread = Thread(target=self._process_event, name="ProcessWrapper._process_event")
         event_thread.start()
-        clock_thread = Thread(target=self._process_clock)
+        clock_thread = Thread(target=self._process_clock, name="ProcessWrapper._process_clock")
         clock_thread.start()
 
         event_thread.join()

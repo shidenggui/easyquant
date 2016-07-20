@@ -1,5 +1,4 @@
 import easyquotation
-from easyquant.push_engine.clock_engine import ClockEngine
 
 import easyquant
 from easyquant import DefaultQuotationEngine, DefaultLogHandler, PushBaseEngine
@@ -38,6 +37,7 @@ class LFEngine(PushBaseEngine):
     def fetch_quotation(self):
         return self.source.stocks(['162411', '000002'])
 
+
 quotation_choose = input('请输入使用行情引擎 1: sina 2: leverfun 十档 行情(目前只选择了 162411, 000002)\n:')
 
 quotation_engine = DefaultQuotationEngine if quotation_choose == '1' else LFEngine
@@ -52,7 +52,7 @@ log_filepath = input('请输入 log 文件记录路径\n: ') if log_type == 'fil
 
 log_handler = DefaultLogHandler(name='测试', log_type=log_type, filepath=log_filepath)
 
-
 m = easyquant.MainEngine(broker, need_data, quotation_engines=[quotation_engine], log_handler=log_handler)
+m.is_watch_strategy = True  # 策略文件出现改动时,自动重载,不建议在生产环境下使用
 m.load_strategy()
 m.start()

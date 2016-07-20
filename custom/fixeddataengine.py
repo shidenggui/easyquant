@@ -25,7 +25,7 @@ class FixedDataEngine(PushBaseEngine):
         self.source = None
         self.__queue = mp.Queue(1000)
         self.is_pause = not clock_engine.is_tradetime_now()
-        self._control_thread = Thread(target=self._process_control)
+        self._control_thread = Thread(target=self._process_control, name="FixedDataEngine._control_thread")
         self._control_thread.start()
         super(FixedDataEngine, self).__init__(event_engine, clock_engine)
 

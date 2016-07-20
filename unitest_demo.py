@@ -104,16 +104,16 @@ class TestClock(BaseTest):
         clock_engien = ClockEngine(EventEngine(), tzinfo)
 
         # 去掉微秒误差后验证其数值
-        self.assertEqual(clock_engien.now, now.timestamp())         # time.time 时间戳
-        self.assertEqual(clock_engien.now_dt, now)       # datetime 时间戳
+        self.assertEqual(clock_engien.now, now.timestamp())  # time.time 时间戳
+        self.assertEqual(clock_engien.now_dt, now)  # datetime 时间戳
 
         # 据此可以模拟一段时间内各个闹钟事件的触发,比如模拟开市9:00一直到休市15:00
         for _ in range(60):
             clock_engien.tock()
-            now += datetime.timedelta(seconds=1)                        # 每秒触发一次 tick_tock
+            now += datetime.timedelta(seconds=1)  # 每秒触发一次 tick_tock
             time.time = mock.Mock(return_value=now.timestamp())
-            self.assertEqual(clock_engien.now, now.timestamp())         # time.time 时间戳
-            self.assertEqual(clock_engien.now_dt, now)                  # datetime 时间戳
+            self.assertEqual(clock_engien.now, now.timestamp())  # time.time 时间戳
+            self.assertEqual(clock_engien.now_dt, now)  # datetime 时间戳
 
     def test_clock_moment_is_active(self):
         # 设置时间
@@ -325,7 +325,6 @@ class TestClock(BaseTest):
         self.assertEqual(len(counts[15]), (15 - 9) * 4 + 1 -
                          len(["9:00"]))
 
-
     def test_tick_moment_event(self):
         """
         测试 tick 中的时刻时钟事件
@@ -357,7 +356,7 @@ class TestClock(BaseTest):
 
         # 预估时间事件触发次数, 每个交易日触发一次
         actived_times = 0
-        for date in pd.date_range(begin.date(), periods=days+1):
+        for date in pd.date_range(begin.date(), periods=days + 1):
             if is_trade_date(date):
                 actived_times += 1
 
@@ -384,4 +383,3 @@ class TestClock(BaseTest):
         self.assertEqual(len(counts['pause']), actived_times)
         self.assertEqual(len(counts['continue']), actived_times)
         self.assertEqual(len(counts['close']), actived_times)
-
