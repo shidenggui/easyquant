@@ -1,14 +1,17 @@
+import time
 import datetime as dt
 from dateutil import tz
 from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
 
-
 class Strategy(StrategyTemplate):
     name = '测试策略1'
 
     def init(self):
-        now = self.clock_engine.now_dt
+        # 通过下面的方式来获取时间戳
+        now_dt = self.clock_engine.now_dt
+        now = self.clock_engine.now
+        now = time.time()
 
         # 注册时钟事件
         clock_type = "盘尾"

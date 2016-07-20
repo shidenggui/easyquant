@@ -21,7 +21,7 @@ class BaseEngine:
         self.event_engine = event_engine
         self.clock_engine = clock_engine
         self.is_active = True
-        self.quotation_thread = Thread(target=self.push_quotation)
+        self.quotation_thread = Thread(target=self.push_quotation, name="QuotationEngine.%s" % self.EventType)
         self.quotation_thread.setDaemon(False)
         self.init()
 

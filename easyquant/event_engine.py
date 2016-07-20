@@ -23,7 +23,7 @@ class EventEngine:
         self.__active = False
 
         # 事件引擎处理线程
-        self.__thread = Thread(target=self.__run)
+        self.__thread = Thread(target=self.__run, name="EventEngine.__thread")
 
         # 事件字典，key 为时间， value 为对应监听事件函数的列表
         self.__handlers = defaultdict(list)
@@ -33,7 +33,7 @@ class EventEngine:
         while self.__active:
             try:
                 event = self.__queue.get(block=True, timeout=1)
-                handle_thread = Thread(target=self.__process, args=(event,))
+                handle_thread = Thread(target=self.__process, name="EventEngine.__process", args=(event,))
                 handle_thread.start()
             except Empty:
                 pass

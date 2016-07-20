@@ -5,6 +5,7 @@ import sys
 import time
 from collections import OrderedDict
 import dill
+from threading import Thread, Lock
 
 import easytrader
 from logbook import Logger, StreamHandler
@@ -22,6 +23,7 @@ if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
     raise Exception('Python 版本需要 3.5 或以上, 当前版本为 %s.%s 请升级 Python' % (PY_MAJOR_VERSION, PY_MINOR_VERSION))
 
 ACCOUNT_OBJECT_FILE = 'account.session'
+
 
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
@@ -62,6 +64,20 @@ class MainEngine:
         self.strategies = OrderedDict()
         self.strategy_list = list()
 
+        # 是否要动态重载策略
+        self.is_watch_strategy = False
+        # 修改时间缓存
+        self._cache = {}
+        # # 文件进程映射
+        # self._process_map = {}
+        # 文件模块映射
+        self._modules = {}
+        self._names = None
+        # 加载锁
+        self.lock = Lock()
+        # 加载线程
+        self._watch_thread = Thread(target=self._load_strategy, name="MainEngine.watch_reload_strategy")
+
         self.log.info('启动主引擎')
 
     def start(self):
@@ -74,24 +90,98 @@ class MainEngine:
             quotation_engine.start()
         self.clock_engine.start()
 
+    def load(self, names, strategy_file):
+        with self.lock:
+            mtime = os.path.getmtime(os.path.join('strategies', strategy_file))
+
+            # 是否需要重新加载
+            reload = False
+
+            strategy_module_name = os.path.basename(strategy_file)[:-3]
+            new_module = lambda strategy_module_name: importlib.import_module('.' + strategy_module_name, 'strategies')
+            strategy_module = self._modules.get(
+                strategy_file,  # 从缓存中获取 module 实例
+                new_module(strategy_module_name)  # 创建新的 module 实例
+            )
+
+            if self._cache.get(strategy_file, None) == mtime:
+                # 检查最后改动时间
+                return
+            elif self._cache.get(strategy_file, None) is not None:
+                # 注销策略的监听
+                old_strategy = self.get_strategy(strategy_module.Strategy.name)
+                if old_strategy is None:
+                    print(18181818, strategy_module_name)
+                    for s in self.strategy_list:
+                        print(s.name)
+                self.log.warn(u'卸载策略: %s' % old_strategy.name)
+                self.strategy_listen_event(old_strategy, "unlisten")
+                time.sleep(2)
+                reload = True
+            # 重新加载
+            if reload:
+                strategy_module = importlib.reload(strategy_module)
+
+            self._modules[strategy_file] = strategy_module
+
+            strategy_class = getattr(strategy_module, 'Strategy')
+            if names is None or strategy_class.name in names:
+                self.strategies[strategy_module_name] = strategy_class
+                # 缓存加载信息
+                new_strategy = strategy_class(log_handler=self.log, main_engine=self)
+                self.strategy_list.append(new_strategy)
+                self._cache[strategy_file] = mtime
+                self.strategy_listen_event(new_strategy, "listen")
+                self.log.info(u'加载策略: %s' % strategy_module_name)
+
+    def strategy_listen_event(self, strategy, _type="listen"):
+        """
+        所有策略要监听的事件都绑定到这里
+        :param strategy: Strategy()
+        :param _type: "listen" OR "unlisten"
+        :return:
+        """
+        func = {
+            "listen": self.event_engine.register,
+            "unlisten": self.event_engine.unregister,
+        }.get(_type)
+
+        # 行情引擎的事件
+        for quotation_engine in self.quotation_engines:
+            func(quotation_engine.EventType, strategy.run)
+
+        # 时钟事件
+        func(ClockEngine.EventType, strategy.clock)
+
     def load_strategy(self, names=None):
         """动态加载策略
         :param names: 策略名列表，元素为策略的 name 属性"""
         s_folder = 'strategies'
+        self._names = names
         strategies = os.listdir(s_folder)
         strategies = filter(lambda file: file.endswith('.py') and file != '__init__.py', strategies)
         importlib.import_module(s_folder)
         for strategy_file in strategies:
-            strategy_module_name = os.path.basename(strategy_file)[:-3]
-            strategy_module = importlib.import_module('.' + strategy_module_name, 'strategies')
-            strategy_class = getattr(strategy_module, 'Strategy')
+            self.load(self._names, strategy_file)
+        # 如果线程没有启动，就启动策略监视线程
+        if self.is_watch_strategy and not self._watch_thread.is_alive():
+            self.log.warn("启用了动态加载策略功能")
+            self._watch_thread.start()
 
-            if names is None or strategy_class.name in names:
-                self.strategies[strategy_module_name] = strategy_class
-                self.strategy_list.append(strategy_class(log_handler=self.log, main_engine=self))
-                self.log.info('加载策略: %s' % strategy_module_name)
+    def _load_strategy(self):
+        while True:
+            try:
+                self.load_strategy(self._names)
+                time.sleep(2)
+            except Exception as e:
+                print(e)
+
+    def get_strategy(self, name):
+        """
+        :param name:
+        :return:
+        """
         for strategy in self.strategy_list:
-            self.event_engine.register(ClockEngine.EventType, strategy.clock)
-            for quotation_engine in self.quotation_engines:
-                self.event_engine.register(quotation_engine.EventType, strategy.run)
-        self.log.info('加载策略完毕')
+            if strategy.name == name:
+                return strategy
+        return None
