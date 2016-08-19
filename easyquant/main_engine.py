@@ -276,4 +276,5 @@ class MainEngine:
             st()
 
         # 退出
+        time.sleep(.1)
         sys.exit(1)
