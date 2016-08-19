@@ -60,7 +60,7 @@ class MainEngine:
             quotation_engines = [quotation_engines]
         else:
             types = [quo.EventType for quo in quotation_engines]
-            if len(types) != set(types):
+            if len(types) != len(set(types)):
                 types.sort()
                 types = ','.join([str(t) for t in types])
                 raise ValueError("行情引擎 EventType 重复:" + types)
@@ -252,6 +252,7 @@ class MainEngine:
         关闭进程前的处理
         :return:
         """
+        self.log.debug("开始关闭进程...")
         # 所有 shutdown 前的触发点
         for st in self.before_shutdown:
             st()
@@ -262,10 +263,11 @@ class MainEngine:
 
         # 等待所有线程关闭, 直到只留下主线程
         c = threading.active_count()
-        while threading.active_count() == c:
+        while threading.active_count() != c:
             time.sleep(2)
 
         # 调用策略的 shutdown
+        self.log.debug("开始关闭策略...")
         for s in self.strategy_list:
             s.shutdown()
 

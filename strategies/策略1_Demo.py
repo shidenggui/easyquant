@@ -83,7 +83,7 @@ class Strategy(StrategyTemplate):
 
     def log_handler(self):
         """自定义 log 记录方式"""
-        return DefaultLogHandler(self.name, log_type='file', filepath='demo1.log')
+        return DefaultLogHandler(self.name, log_type='stdout', filepath='demo1.log')
 
     def shutdown(self):
         """
