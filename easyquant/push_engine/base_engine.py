@@ -36,11 +36,11 @@ class BaseEngine:
             try:
                 response_data = self.fetch_quotation()
             except aiohttp.errors.ServerDisconnectedError:
-                time.sleep(self.PushInterval)
+                self.wait()
                 continue
             event = Event(event_type=self.EventType, data=response_data)
             self.event_engine.put(event)
-            time.sleep(self.PushInterval)
+            self.wait()
 
     def fetch_quotation(self):
         # return your quotation
@@ -49,3 +49,15 @@ class BaseEngine:
     def init(self):
         # do something init
         pass
+    
+    def wait(self):
+        interval = self.PushInterval
+        if interval < 1:
+            time.sleep(interval)
+            return
+        else:
+            time.sleep(self.PushInterval - int(interval))
+            interval = int(interval)
+            while interval > 0 and self.is_active:
+                time.sleep(1)
+                interval -= 1

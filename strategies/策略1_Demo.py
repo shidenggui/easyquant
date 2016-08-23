@@ -4,6 +4,7 @@ from dateutil import tz
 from easyquant import DefaultLogHandler
 from easyquant import StrategyTemplate
 
+
 class Strategy(StrategyTemplate):
     name = '测试策略1'
 
@@ -82,4 +83,11 @@ class Strategy(StrategyTemplate):
 
     def log_handler(self):
         """自定义 log 记录方式"""
-        return DefaultLogHandler(self.name, log_type='file', filepath='demo1.log')
+        return DefaultLogHandler(self.name, log_type='stdout', filepath='demo1.log')
+
+    def shutdown(self):
+        """
+        关闭进程前的调用
+        :return:
+        """
+        self.log.info("假装在关闭前保存了策略数据")

@@ -75,3 +75,10 @@ class StrategyTemplate:
         :return: log_handler or None
         """
         return None
+
+    def shutdown(self):
+        """
+        关闭进程前调用该函数
+        :return:
+        """
+        pass
