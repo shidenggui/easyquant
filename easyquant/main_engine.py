@@ -1,13 +1,12 @@
 import importlib
 import os
 import pathlib
+import signal
 import sys
+import threading
 import time
 from collections import OrderedDict
-import dill
-import threading
 from threading import Thread, Lock
-import signal
 
 import easytrader
 from logbook import Logger, StreamHandler
@@ -43,8 +42,6 @@ class MainEngine:
             need_data_file = pathlib.Path(need_data)
             if need_data_file.exists():
                 self.user.prepare(need_data)
-                with open(ACCOUNT_OBJECT_FILE, 'wb') as f:
-                    dill.dump(self.user, f)
             else:
                 log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
         else:
@@ -91,11 +88,12 @@ class MainEngine:
         self.main_shutdown = []  # 引擎自身要执行的 shutdown
         self.after_shutdown = []  # 关闭引擎后的 shutdown
         self.shutdown_signals = [
-            signal.SIGQUIT,  # quit 信号
             signal.SIGINT,  # 键盘信号
             signal.SIGHUP,  # nohup 命令
             signal.SIGTERM,  # kill 命令
         ]
+        if sys.platform != 'win32':
+            self.shutdown_signals.append(signal.SIGQUIT)
 
         for s in self.shutdown_signals:
             # 捕获退出信号后的要调用的,唯一的 shutdown 接口
@@ -139,7 +137,6 @@ class MainEngine:
                 # 注销策略的监听
                 old_strategy = self.get_strategy(strategy_module.Strategy.name)
                 if old_strategy is None:
-                    print(18181818, strategy_module_name)
                     for s in self.strategy_list:
                         print(s.name)
                 self.log.warn(u'卸载策略: %s' % old_strategy.name)
@@ -156,7 +153,7 @@ class MainEngine:
             if names is None or strategy_class.name in names:
                 self.strategies[strategy_module_name] = strategy_class
                 # 缓存加载信息
-                new_strategy = strategy_class(log_handler=self.log, main_engine=self)
+                new_strategy = strategy_class(user=self.user, log_handler=self.log, main_engine=self)
                 self.strategy_list.append(new_strategy)
                 self._cache[strategy_file] = mtime
                 self.strategy_listen_event(new_strategy, "listen")
