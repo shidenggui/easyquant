@@ -44,13 +44,6 @@ class BaseEngine:
         pass
 
     def wait(self):
-        interval = self.PushInterval
-        if interval < 1:
-            time.sleep(interval)
-            return
-        else:
-            time.sleep(self.PushInterval - int(interval))
-            interval = int(interval)
-            while interval > 0 and self.is_active:
-                time.sleep(1)
-                interval -= 1
+        # for receive quit signal
+        for _ in range(int(self.PushInterval) + 1):
+            time.sleep(1)
