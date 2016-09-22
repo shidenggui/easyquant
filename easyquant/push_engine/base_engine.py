@@ -2,11 +2,7 @@
 import time
 from threading import Thread
 
-import aiohttp
-
 from easyquant.event_engine import Event
-
-ACCOUNT_OBJECT_FILE = 'account.session'
 
 
 class BaseEngine:
@@ -32,7 +28,7 @@ class BaseEngine:
         while self.is_active:
             try:
                 response_data = self.fetch_quotation()
-            except aiohttp.errors.ServerDisconnectedError:
+            except:
                 self.wait()
                 continue
             event = Event(event_type=self.EventType, data=response_data)
