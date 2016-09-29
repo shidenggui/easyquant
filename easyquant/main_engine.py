@@ -89,11 +89,10 @@ class MainEngine:
         self.after_shutdown = []  # 关闭引擎后的 shutdown
         self.shutdown_signals = [
             signal.SIGINT,  # 键盘信号
-            signal.SIGHUP,  # nohup 命令
             signal.SIGTERM,  # kill 命令
         ]
         if sys.platform != 'win32':
-            self.shutdown_signals.append(signal.SIGQUIT)
+            self.shutdown_signals.extend([signal.SIGHUP, signal.SIGQUIT])
 
         for s in self.shutdown_signals:
             # 捕获退出信号后的要调用的,唯一的 shutdown 接口
@@ -202,20 +201,12 @@ class MainEngine:
                 print(e)
 
     def get_strategy(self, name):
-        """
-        :param name:
-        :return:
-        """
         for strategy in self.strategy_list:
             if strategy.name == name:
                 return strategy
         return None
 
     def get_quotation(self, eventype):
-        """
-        :param name:
-        :return:
-        """
         for quo in self.quotation_engines:
             if quo.EventType == eventype:
                 return quo
