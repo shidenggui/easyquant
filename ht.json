@@ -1,5 +1,6 @@
 {
-    "userName":"用户名",
-    "servicePwd":"通讯密码",
-    "trdpwd":"加密后的密码"
+    "user":"用户名",
+    "comm_password":"通讯密码",
+    "password":"交易密码",
+    "exe_path":"运行路径"
 }

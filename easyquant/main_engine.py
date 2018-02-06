@@ -7,6 +7,9 @@ import threading
 import time
 from collections import OrderedDict
 from threading import Thread, Lock
+import json
+import argparse
+from collections import namedtuple
 
 import easytrader
 from logbook import Logger, StreamHandler
@@ -25,7 +28,6 @@ if (PY_MAJOR_VERSION, PY_MINOR_VERSION) < (3, 5):
 
 ACCOUNT_OBJECT_FILE = 'account.session'
 
-
 class MainEngine:
     """主引擎，负责行情 / 事件驱动引擎 / 交易"""
 
@@ -38,10 +40,14 @@ class MainEngine:
 
         # 登录账户
         if (broker is not None) and (need_data is not None):
+            broker += "_client"
             self.user = easytrader.use(broker)
             need_data_file = pathlib.Path(need_data)
             if need_data_file.exists():
-                self.user.prepare(need_data)
+                with open(need_data_file) as json_data:
+                    need_data = json.load(json_data)
+                    self.user.login(**need_data)
+                #self.user.prepare(need_data)
             else:
                 log_handler.warn("券商账号信息文件 %s 不存在, easytrader 将不可用" % need_data)
         else:
