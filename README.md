@@ -20,7 +20,22 @@
 
 [实现交易的类库: easytrader](https://github.com/shidenggui/easytrader)
 
-捐助: [支付宝](http://7xqo8v.com1.z0.glb.clouddn.com/zhifubao2.png)  [微信](http://7xqo8v.com1.z0.glb.clouddn.com/wx.png)
+## 公众号
+
+扫码关注“易量化”的微信公众号，不定时更新一些个人文章及与大家交流
+
+![](https://raw.githubusercontent.com/shidenggui/assets/master/easytrader/easy_quant_qrcode.jpg)
+
+## 赞助:
+
+![微信](https://raw.githubusercontent.com/shidenggui/assets/master/easytrader/wechat_pay_qr.png)             ![支付宝](https://raw.githubusercontent.com/shidenggui/assets/master/easytrader/alipay_qr.jpeg)
+
+### 其他
+
+最近在开发一个[大数据网络小说推荐系统 - 推书君](https://www.tuishujun.com)，同时也将相关的功能集成到了对应的公众号，刚刚起步，如果大家对网文感兴趣的话欢迎关注交流
+
+![推书君](https://raw.githubusercontent.com/shidenggui/assets/master/tuishujun/qr.jpeg)
+
 
 ### requirements
 
