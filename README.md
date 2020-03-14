@@ -10,32 +10,21 @@
 
 行情:支持新浪免费实时行情，集思路分级基金以及 leverfun 的免费十档行情
 
-有兴趣的可以加群 `556050652` 一起交流
 
-欢迎 `star` && `fork`
+### 微信群以及公众号
 
-### 相关
+欢迎大家扫码关注公众号「食灯鬼」，一起交流。进群可通过菜单加我好友，备注量化。
 
-[获取免费实时行情的类库: easyquotation](https://github.com/shidenggui/easyquotation)
+![公众号二维码](https://gitee.com/shidenggui/assets/raw/master/uPic/mp-qr.png)
 
-[实现交易的类库: easytrader](https://github.com/shidenggui/easytrader)
+若二维码因 Github 网络无法打开，请点击[公众号二维码](https://gitee.com/shidenggui/assets/raw/master/uPic/mp-qr.png)直接打开图片。
 
-## 公众号
+### Author
 
-扫码关注“易量化”的微信公众号，不定时更新一些个人文章及与大家交流
+**easyquant** © [shidenggui](https://github.com/shidenggui), Released under the [MIT](./LICENSE) License.<br>
 
-![](https://raw.githubusercontent.com/shidenggui/assets/master/easytrader/easy_quant_qrcode.jpg)
-
-## 赞助:
-
-![微信](https://raw.githubusercontent.com/shidenggui/assets/master/easytrader/wechat_pay_qr.png)             ![支付宝](https://raw.githubusercontent.com/shidenggui/assets/master/easytrader/alipay_qr.jpeg)
-
-### 其他
-
-最近在开发一个[大数据网络小说推荐系统 - 推书君](https://www.tuishujun.com)，同时也将相关的功能集成到了对应的公众号，刚刚起步，如果大家对网文感兴趣的话欢迎关注交流
-
-![推书君](https://raw.githubusercontent.com/shidenggui/assets/master/tuishujun/qr.jpeg)
-
+> Blog [@shidenggui](https://shidenggui.com) · Weibo [@食灯鬼](https://www.weibo.com/u/1651274491) · Twitter [@shidenggui](https://twitter.com/shidenggui)
+>
 
 ### requirements
 
