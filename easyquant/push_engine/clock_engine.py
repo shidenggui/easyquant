@@ -63,10 +63,18 @@ class ClockMomentHandler:
         self.is_trading_date = is_trading_date
         self.makeup = makeup
         self.call = call or (lambda: None)
-        self.next_time = datetime.datetime.combine(
-                self.clock_engine.now_dt.date(),
-                self.moment,
-        )
+        #只在交易日执行定时任务(is_trading_date == True),当天为非交易日时,取最近一个交易日来设置next_time
+        if self.is_trading_date == True and not etime.is_trade_date(self.clock_engine.now_dt):
+            next_date = etime.get_next_trade_date(self.clock_engine.now_dt)
+            self.next_time = datetime.datetime.combine(
+                    next_date,
+                    self.moment
+            )
+        else:
+            self.next_time = datetime.datetime.combine(
+                    self.clock_engine.now_dt.date(),
+                    self.moment,
+            )
 
         if not self.makeup and self.is_active():
             self.update_next_time()
